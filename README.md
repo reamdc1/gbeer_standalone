@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 In this document I will explain how to use the software contained in this project. 
 
 The easiest way to run the project is to execute the script named 'gbeer_standalone.py'.  The defaults
@@ -46,3 +47,7 @@ optional arguments:
                         are unnecessary for analysis, reducing the storage
                         requirements for a run.
 
+=======
+# gbeer_standalone
+This is a project based on my earlier gene_block_evolution project.
+>>>>>>> f3a44d21adccfd356de425f0cd080b351378175d

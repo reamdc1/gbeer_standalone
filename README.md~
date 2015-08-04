@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 In this document I will explain how to use the software contained in this project. 
 
 The easiest way to run the project is to execute the script named 'gbeer_standalone.py'.  The defaults
@@ -8,21 +9,19 @@ begins at though this could become a feaure later.
 
 
 gbeer_standalone.py -h
-usage: main.py [-h] [-i FILE] [-I FOLDER] [-o FOLDER] [-f FILE] [-n INT]
-               [-m INT] [-g INT] [-e FLOAT]
-
 The purpose of this script is to run the full software suite that we have
 developed to study operons using as few inputs as possible. This will
 facilitate the ease of use as much as possible.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i FILE, --infile FILE
-                        Input file for the operon query step of the pipeline.
-  -I FOLDER, --infolder FOLDER
+  -i FILE, --gene_block_file FILE
+                        Input file for the gene block query step of the
+                        pipeline.
+  -G DIRECTORY, --genbank_directory DIRECTORY
                         Folder containing all genbank files for use by the
                         program.
-  -o FOLDER, --outfolder FOLDER
+  -o DIRECTORY, --outfolder DIRECTORY
                         Folder where results will be stored.
   -f FILE, --filter FILE
                         File restrictiong which accession numbers this script
@@ -42,3 +41,13 @@ optional arguments:
                         500.
   -e FLOAT, --eval FLOAT
                         eval for the BLAST search.
+  -t FILE, --tree FILE  Newick format tree file which will be used to bypass
+                        tree creation.
+  -c, --clean           Flag to toggle the removal of intermediate files that
+                        are unnecessary for analysis, reducing the storage
+                        requirements for a run.
+
+=======
+# gbeer_standalone
+This is a project based on my earlier gene_block_evolution project.
+>>>>>>> f3a44d21adccfd356de425f0cd080b351378175d
