@@ -8,10 +8,14 @@ from multiprocessing import Pool
 from Bio import SeqIO
 from Bio.SeqUtils import GC
 
-# Copyright(C) 2013 David Ream
+# Copyright(C) 2015 David Ream
 # Released under GPL version 3 licence. http://www.gnu.org/licenses/lgpl.html
 # Do not remove this comment
 
+#############################################################################
+# all unnecessary references to operon have been removed at this point.     #
+# unnecessary outputs have been removed. an option for quiet might be nice  #
+#############################################################################
 
 # This exists to  make the main function easier to read. It contains code to run the argument parser, and does nothing else.
 def parser_code():
@@ -40,8 +44,11 @@ def parser_code():
                 help="Add this option if you wish to use non-experimentally determined operons.")
     
     parser.add_argument("-m", "--min_genes", dest="min_genes", metavar="INT", default = 5, type=int,
-                help="Minum number of genes that an operon must contain before it can be considered for further analysis. The default is 5 because that is what we are currently using in the study.")
+                help="Minum number of genes that a gene block must contain before it can be considered for further analysis. The default is 5 because that is what we are currently using in the study.")
     
+    parser.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
+                help="Suppresses most program text outputs.")
+                
     return parser.parse_args()
     
     
@@ -85,8 +92,9 @@ def check_options(parsed_args):
     download = parsed_args.download
     url = parsed_args.url
     experimental_only = parsed_args.experimental_only
+    quiet = parsed_args.quiet
 
-    return infolder, outfolder, filter_file, num_proc, download, url, experimental_only, min_genes
+    return infolder, outfolder, filter_file, num_proc, download, url, experimental_only, min_genes, quiet
 
 
 #this function will return all of the files that are in a directory. os.walk is recursive traversal.
@@ -120,10 +128,8 @@ def download_remote_file(url, outfile, block = 4096): # low memory implementatio
     handle.close()
 
 def regulon_db(outfolder, number_of_genes, url, download, experimantal, outfile):
-    #outfile = outfolder + 'operon_names_and_genes_unfiltered.txt'
     url_outfile = outfolder +"OperonSet.txt"
     if download:
-        #download_remote_file(url, "./regulonDB/OperonSet.txt")
         download_remote_file(url, url_outfile)
     
     # this bit of code parses the regulon DB file, keep in mind the columns:
@@ -136,7 +142,6 @@ def regulon_db(outfolder, number_of_genes, url, download, experimantal, outfile)
     # (7) Evidence that support the existence of the operon's TUs
     
     tmp_list = []
-    #for line in [i.strip() for i in open("./regulonDB/OperonSet.txt").readlines()]:
     for line in [i.strip() for i in open(url_outfile).readlines()]:
         if len(line) < 2:
             pass
@@ -198,7 +203,7 @@ def return_genbank_dict(gb_file, key = 'annotation', seq_type = 'amino_acid'):
                     locus = feature.qualifiers['gene'][0]
                 except:
                     locus = ''
-                    print 'No locus associated. This should never be invoked meaning you are proper fracked. (The gbk file has an error).'
+                    print "No locus associated with a reporrted feature in accession %s This should never be invoked meaning the gbk file has an error." % accession
             try: 
                 gene = feature.qualifiers['gene'][0]
             except:
@@ -251,35 +256,35 @@ def parallel_genome_dict(genome):
 
 
 def parse_regulonDB_file_and_store_results(outfolder, min_genes, url, download, experimental_only, organism_dict_for_recovery):
-    #outfile = outfolder + 'operon_names_and_genes_unfiltered.txt'
-    unfiltered_regulong_parsed_file = outfolder + 'operon_names_and_genes_unfiltered.txt'
+    #outfile = outfolder + 'gene_block_names_and_genes_unfiltered.txt'
+    unfiltered_regulong_parsed_file = outfolder + 'gene_block_names_and_genes_unfiltered.txt'
     if download:
-        print "Download"
+        #print "Download"
         #regulon_db(outfile, min_genes, url, download, experimental_only)
         regulon_db(outfolder, min_genes, url, download, experimental_only, unfiltered_regulong_parsed_file)
     
     protein_only_list = []
-    mixed_list = [] # this is a list that contains operons that contain both protein coding and RNA coding genes
+    mixed_list = [] # this is a list that contains gene blocks that contain both protein coding and RNA coding genes
 
     gene_dict = {}
     
     # open the file that contains the pathways to each of the refrence genomes (since this is regulonDB, both varients of E. coli apply
-    for operon_line in [i.strip().split('\t') for i in open(outfile).readlines()]:
-        operon_name = operon_line[0]
-        gene_dict.update({operon_name:{}})
-        #print operon_name
-        for gene in operon_line[1:]:
-            gene_dict[operon_name].update({gene:[]})
+    for gene_block_line in [i.strip().split('\t') for i in open(unfiltered_regulong_parsed_file).readlines()]:
+        gene_block_name = gene_block_line[0]
+        gene_dict.update({gene_block_name:{}})
+        #print gene_block_name
+        for gene in gene_block_line[1:]:
+            gene_dict[gene_block_name].update({gene:[]})
             for ref_org in sorted(organism_dict_for_recovery.keys()):
                 try:
                     gene_product =  organism_dict_for_recovery[ref_org][gene][0].split('|')[7]
-                    gene_dict[operon_name][gene].append(gene_product)
+                    gene_dict[gene_block_name][gene].append(gene_product)
                 except:
                     pass
 
     # there are two classes of potential products, protein and rna.  there is a list of terms that are acceptable for each
     # These two lists keep track of this, so we know what are effectively congruent terms, as we only care if they prot/rna are signaled.
-    # when we determine the typ of each operon, which is RNA, protein, mixed.
+    # when we determine the typ of each gene block, which is RNA, protein, mixed.
     rna_list = ['tRNA', 'rRNA', 'ncRNA', ]
     protein_list = ['Protein', 'Pseudo_Gene']
     
@@ -287,61 +292,62 @@ def parse_regulonDB_file_and_store_results(outfolder, min_genes, url, download, 
     rna_result = []
     mixed_result = []
     
-    # this can be removed later, after I later change downstream operon file parsing
+    # this can be removed later, after I later change downstream gene block file parsing
     old_result = []
 
-    for operon in sorted(gene_dict.keys()):
-        operon_error = False # If there is missing/inconsistent information in the genes then ignore the operon
-        operon_type = ''
+    for gene_block in sorted(gene_dict.keys()):
+        gene_block_error = False # If there is missing/inconsistent information in the genes then ignored the gene block
+        gene_block_type = ''
         gene_list = []
         old_gene_list = []
-        for gene in gene_dict[operon]:
+        for gene in gene_dict[gene_block]:
             gene_type = ''
-            if len(gene_dict[operon][gene]) == 0:
-                #print operon, gene, "Missing annotation information"
-                operon_error = True
-            elif len(gene_dict[operon][gene]) == 1:
-                if gene_dict[operon][gene][0] in protein_list:
+            if len(gene_dict[gene_block][gene]) == 0:
+                #print gene_block, gene, "Missing annotation information"
+                gene_block_error = True
+            elif len(gene_dict[gene_block][gene]) == 1:
+                if gene_dict[gene_block][gene][0] in protein_list:
                     gene_type = 'p'
-                elif gene_dict[operon][gene][0] in rna_list:
+                elif gene_dict[gene_block][gene][0] in rna_list:
                     gene_type = 'r'
                 else:
                     pass
             else:
-                tmp_name = gene_dict[operon][gene][0]
-                for next_type in gene_dict[operon][gene][1:]:
+                tmp_name = gene_dict[gene_block][gene][0]
+                for next_type in gene_dict[gene_block][gene][1:]:
                     if next_type in protein_list and tmp_name in protein_list:
                         gene_type = 'p'
                     elif next_type in rna_list and tmp_name in rna_list:
                         gene_type = 'r'
                     else:
-                        #print operon, gene, "Annotation information disagrees"
-                        operon_error = True
+                        #print gene_block, gene, "Annotation information disagrees"
+                        gene_block_error = True
 
 
             gene_list.append("%s:%s" % (gene, gene_type))
             old_gene_list.append(gene)
-            if operon_error:
+            if gene_block_error:
                 pass
-            elif operon_type == '': # We have not evaluated the opern type (protein, RNA, mixed) yet, so set it to the type of the first gene
-                operon_type = gene_type
-            elif operon_type != gene_type:
-                operon_type = 'm'
-            elif operon_type == gene_type:
+            elif gene_block_type == '': # We have not evaluated the opern type (protein, RNA, mixed) yet, so set it to the type of the first gene
+                gene_block_type = gene_type
+            elif gene_block_type != gene_type:
+                gene_block_type = 'm'
+            elif gene_block_type == gene_type:
                 pass
             else:
-                print "the function broke"
-        if operon_error:
-            print "rejected operon ", operon
-            operon_error = False
-        elif operon_type == 'p':
-            prot_result.append('\t'.join([operon] + gene_list))
-            # Remove next line after operon list parsing has been updated
-            old_result.append('\t'.join([operon] + old_gene_list))
-        elif operon_type == 'r':
-            rna_result.append('\t'.join([operon] + gene_list))
+                print "The function parse_regulonDB_file_and_store_results broke from the regulon_dl_parse.py script"
+        if gene_block_error:
+            if not quiet:
+                print "rejected gene block ", gene_block
+            gene_block_error = False
+        elif gene_block_type == 'p':
+            prot_result.append('\t'.join([gene_block] + gene_list))
+            # Remove next line after gene_block list parsing has been updated
+            old_result.append('\t'.join([gene_block] + old_gene_list))
+        elif gene_block_type == 'r':
+            rna_result.append('\t'.join([gene_block] + gene_list))
         else:
-            mixed_result.append('\t'.join([operon] + gene_list))
+            mixed_result.append('\t'.join([gene_block] + gene_list))
     #print "prot_result", prot_result
     #print "rna_result", rna_result
     #print "mixed_result", mixed_result
@@ -358,9 +364,9 @@ def parse_regulonDB_file_and_store_results(outfolder, min_genes, url, download, 
     # of working further on this program.                                                                                                       #
     #############################################################################################################################################
 
-    handle_prot = open(outfolder + 'operon_name_and_genes_prot_only.txt', 'w')
-    handle_rna = open(outfolder + 'operon_name_and_genes_rna_only.txt', 'w')
-    handle_mixed_type = open(outfolder + 'operon_name_and_genes_mixed_type.txt', 'w')
+    handle_prot = open(outfolder + 'gene_block_name_and_genes_prot_only.txt', 'w')
+    handle_rna = open(outfolder + 'gene_block_name_and_genes_rna_only.txt', 'w')
+    handle_mixed_type = open(outfolder + 'gene_block_name_and_genes_mixed_type.txt', 'w')
     
     handle_prot.write('\n'.join(prot_result))
     handle_prot.close()
@@ -371,7 +377,7 @@ def parse_regulonDB_file_and_store_results(outfolder, min_genes, url, download, 
     handle_mixed_type.write('\n'.join(mixed_result))
     handle_mixed_type.close()
     
-    handle = open(outfolder+ "operon_names_and_genes.txt", 'w')
+    handle = open(outfolder+ "gene_block_names_and_genes.txt", 'w')
     handle.write('\n'.join(old_result))
     handle.close()
   
@@ -381,8 +387,9 @@ def main():
 
     parsed_args = parser_code()
     
-    infolder, outfolder, filter_file, num_proc, download, url, experimental_only, min_genes = check_options(parsed_args)
-    print infolder, outfolder, filter_file, num_proc, download, url, experimental_only, min_genes
+    infolder, outfolder, filter_file, num_proc, download, url, experimental_only, min_genes, quiet = check_options(parsed_args)
+    if not quiet:
+        print infolder, outfolder, filter_file, num_proc, download, url, experimental_only, min_genes, quiet
 
     if filter_file == 'NONE':
         genbank_list = returnRecursiveDirFiles(infolder)
@@ -395,7 +402,8 @@ def main():
 
     parse_regulonDB_file_and_store_results(outfolder, min_genes, url, download, experimental_only, organism_dict_for_recovery)
     
-    print time.time() - start
+    if not quiet:
+        print time.time() - start
     
     # sample input to run
     # ./regulondb_dl_parse.py -f phylo_order.txt

@@ -37,9 +37,6 @@ def parser_code():
     parser.add_argument("-g", "--max_gap", dest="max_gap", metavar="INT", default = 500, type=int,
                 help="Largest allowable gap to be considered a gene block by the analysis.")
                 
-    parser.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
-                help="Suppresses most program text outputs.")
-    
     return parser.parse_args()
 
 
@@ -92,9 +89,7 @@ def check_options(parsed_args):
         print "The gap that you entered %s is not an integer, please enter a positive integer." % parsed_args.max_gap
         sys.exit()
     
-    quiet = parsed_args.quiet
-    
-    return infolder, outfolder, filter_file, num_proc, e_val, max_gap, quiet
+    return infolder, outfolder, filter_file, num_proc, e_val, max_gap
 
 
 #this function will return all of the files that are in a directory. os.walk is recursive traversal.
@@ -392,10 +387,9 @@ def main():
     
     parsed_args = parser_code()
     
-    infolder, outfolder, filter_file, num_proc, e_val, max_gap, quiet = check_options(parsed_args)
+    infolder, outfolder, filter_file, num_proc, e_val, max_gap = check_options(parsed_args)
     
-    if not quiet:
-        print infolder, outfolder, filter_file, num_proc, e_val, max_gap
+    print infolder, outfolder, filter_file, num_proc, e_val, max_gap
     
     file_list = return_file_list(infolder, filter_file)
     parallel_list_param = [(i, outfolder, max_gap, e_val) for i in file_list]
@@ -418,8 +412,7 @@ def main():
             handle.write('\n'.join([i.to_file() for i in grouping_list])+'\n')
         handle.close()
 
-    if not quiet:
-             print time.time() - start
+    print time.time() - start
 
     # ./filter_operon_blast_results.py -f phylo_order.txt
 

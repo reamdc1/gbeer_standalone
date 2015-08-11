@@ -31,7 +31,7 @@ def parser_code():
     # Fix this option, ultimately it should be a folder, that reads in a gene block file with the name of gene block(s) with a list of gene names and types.
     # The program will then take two files, protein and nucleic acid queries and run them. (This would require that there are two seperate, and complementary
     # blast databases within this folder. My desire is that it would be two subfolders, 'protein/' and 'rna/' which house these sets of data.
-    parser.add_argument("-u", "--query", dest="query", default='./gene_block_query_files/protein_matches.fa', metavar="FILE",
+    parser.add_argument("-q", "--query", dest="query", default='./gene_block_query_files/protein_matches.fa', metavar="FILE",
                 help="A file that contains the BLAST query for every gene of interest in the dataset.")
                 
     parser.add_argument("-e", "--eval", dest="eval", default='1e-10', metavar="FLOAT", type=float,

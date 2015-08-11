@@ -22,17 +22,17 @@ def parser_code():
 
     parser = argparse.ArgumentParser(description="This program will calculate the number of events that an organismal pair do not have in common.  The return is a pickled dictionary.")
     
-    parser.add_argument("-i", "--gene_block_file", dest="gene_block_file", default='./regulonDB/operon_names_and_genes.txt', metavar="FILE",
+    parser.add_argument("-i", "--gene_block_file", dest="gene_block_file", default='./regulonDB/gene_block_names_and_genes.txt', metavar="FILE",
                 help="The parsed gene block file. The default is the parsed regulonDB operon file.")
                 
-    parser.add_argument("-I", "--infolder", dest="infolder", default='./optimized_operon/', metavar="DIRECTORY",
+    parser.add_argument("-I", "--infolder", dest="infolder", default='./optimized_gene_block/', metavar="DIRECTORY",
                 help="A folder that contains the final gene block results. Gene blocks are grouped by organism, ordered by start, and have spurious BLAST results removed.")
     
-    parser.add_argument("-o", "--outfolder", dest="outfolder", metavar="DIRECTORY", default='./operon_distance_matrices/',
-                help="Folder where the results will be stored. Default is the folder './operon_distance_matrices/'.")
+    parser.add_argument("-o", "--outfolder", dest="outfolder", metavar="DIRECTORY", default='./gene_block_distance_matrices/',
+                help="Folder where the results will be stored. Default is the folder './gene_block_distance_matrices/'.")
 
     parser.add_argument("-F", "--gene_block_filter", dest="gene_block_filter", default='NONE', metavar="FILE",
-                help="A file that contains the operons that are under investigation.  All others will be omitted from analysis an results.") 
+                help="A file that contains the gene blocks that are under investigation.  All others will be omitted from analysis an results.") 
                 
     # this is where i will/would add the option to filter organisms.       
     
@@ -117,11 +117,11 @@ def return_file_list(infolder, filter_file):
         filter_list = [i.strip() for i in open(filter_file)]
         return [i for i in return_recursive_dir_files(infolder) if os.path.basename(i).split('.')[0] in filter_list]
 
-    
-# This function will take the folder of the operon result files, and it will return a dictionary that has as a primary key
-# the operon name, the secondary key will be nc. The values of the attributes will then follow.
-def parse_operon_result_files(in_folder, dest_folder, operon_filter_file):
-    file_list = return_file_list(in_folder, operon_filter_file)
+# This function is no longer used it would seem.    
+# This function will take the folder of the gene block result files, and it will return a dictionary that has as a primary key
+# the gene block name, the secondary key will be nc. The values of the attributes will then follow.
+def parse_operon_result_files(in_folder, dest_folder, gene_block_filter_file):
+    file_list = return_file_list(in_folder, gene_block_filter_file)
     
     print "file_list", file_list
     
@@ -130,28 +130,28 @@ def parse_operon_result_files(in_folder, dest_folder, operon_filter_file):
     
     iddo_result = {}
     
-    #gene_dict = make_operon_gene_string_dict(operon_file)
+    #gene_dict = make_gene_block_gene_string_dict(gene_block_file)
     #print len(gene_dict)
     
-    print "in_folder", in_folder
+    #print "in_folder", in_folder
 
     #for i in open(distmat_file).readlines():
     #    nc = i.strip().split('\t')[0]
     #    val = i.strip().split('\t')[1].strip() # fixes a wonky error in distmat.... ugh
     #    distmat_dict.update({nc: val})
     for fname in file_list:
-        operon = fname.split('/')[-1].split('.')[0]
+        gene_block = fname.split('/')[-1].split('.')[0]
         #fname = in_folder + f
-        print "fname", fname, operon
-        result.update({operon: {}})
+        print "fname", fname, gene_block
+        result.update({gene_block: {}})
         
-        iddo_result.update({operon: {}})
+        iddo_result.update({gene_block: {}})
         
         file_output = []
         summary_info = [i.strip().split('\t')[1:] for i in open(fname).readlines() if i[:2] == '##']
         homolog_entries = []
         
-        print "summary_info", summary_info
+        #print "summary_info", summary_info
         # This section of code has a single purpose. ad-hoc the goodness of rearrangements and distance
         # between grouped genes.
         
@@ -163,14 +163,14 @@ def parse_operon_result_files(in_folder, dest_folder, operon_filter_file):
         #for i in [i.strip() for i in open(fname).readlines() if len(i) > 1 and i[0] == '#']:
             #if i[:2] == '##':
             if len(i) < 2:
-                print "err", i, fname
+                print "Error in the function parse_operon_result_files from the make_event_distance_matrix script", i, fname
             if i[0] == '#':
                 comprehensive_list, group_list = group_homologs(tmp_hlog_list_for_grouping, INTERGENIC_MAX_LENGTH)
                 for group in group_list:
-                    #print gene_dict[operon]['reference_string']
-                    rearrangements = return_operon_string_distance(gene_dict[operon]['reference_string'], return_group_str(group, operon, gene_dict))
-                    print gene_dict[operon]['reference_string'], return_group_str(group, operon, gene_dict), return_operon_string_distance(gene_dict[operon]['reference_string'], return_group_str(group, operon, gene_dict))
-                    print "vals recorded", gene_dict[operon]['reference_string'], return_group_str(group, operon, gene_dict), return_operon_string_distance(gene_dict[operon]['reference_string'], return_group_str(group, operon, gene_dict)), rearrangements
+                    #print gene_dict[gene_block]['reference_string']
+                    rearrangements = return_operon_string_distance(gene_dict[gene_block]['reference_string'], return_group_str(group, gene_block, gene_dict))
+                    print gene_dict[gene_block]['reference_string'], return_group_str(group, gene_block, gene_dict), return_gene_block_string_distance(gene_dict[gene_block]['reference_string'], return_group_str(group, gene_block, gene_dict))
+                    print "vals recorded", gene_dict[gene_block]['reference_string'], return_group_str(group, gene_block, gene_dict), return_gene_block_string_distance(gene_dict[gene_block]['reference_string'], return_group_str(group, gene_block, gene_dict)), rearrangements
                     print "i line", i, len(i.split('\t'))
                     try:
                         a,nc,c,d,e,f,g,h,i,j,k = i.split('\t') # only interested in a few of the fields here: 
@@ -197,7 +197,7 @@ def parse_operon_result_files(in_folder, dest_folder, operon_filter_file):
         #    print line 
         #print homolog_entries
         #print summary_info
-        print "summary_info2", summary_info
+        #print "summary_info2", summary_info
         for item in summary_info:
             nc = item[0]
             common = ' '.join(item[1].split('_')[:2])
@@ -208,7 +208,7 @@ def parse_operon_result_files(in_folder, dest_folder, operon_filter_file):
                 #print line
                 file_output.append(line)
         header = 'NC_Number,Common,Distance,Splitting,Migration,Duplicates,Deletions,Splits,Longest_Group,Total_Fusions,Group_Fusions\n'
-        handle = open(dest_folder + operon + '.csv', 'w')
+        handle = open(dest_folder + gene_block + '.csv', 'w')
         handle.write(header)
         handle.write('\n'.join([','.join(i) for i in file_output]))
         handle.close()
@@ -255,11 +255,11 @@ def return_gene_block_organism_data(flist):
             try:
                 hlog = Homolog.from_blast(line)
             except:
-                print "ERROR", line
+                print "Error in function return_gene_block_organism_data from script make_event_distance_matrix.py", line
             try:
                 accession = hlog.accession()
             except:
-                print line
+                print "There was an error in the homolog class in function return_gene_block_organism_data from script make_event_distance_matrix.py"
             predicted_gene = hlog.blast_annotation()
             
             # store the homolog where it belongs
@@ -292,10 +292,10 @@ def make_event_reporting_data_structure(gene_block_dict, max_gap):
     result = {}
     
     for gene_block in sorted(gene_block_dict.keys()):
-        print gene_block
+        #print gene_block
         result.update({gene_block:{}})
         for organism in gene_block_dict[gene_block].keys():
-            print organism
+            #print organism
             # we use this list twice, so storing it
             list_homologs = gene_block_dict[gene_block][organism]
             # returns a count of each gene that was in the homolog list as a dictionary
@@ -393,7 +393,7 @@ def return_event_counts_as_dict(event_reporting_data_structure):
     result = {}
     
     for gene_block in sorted(event_reporting_data_structure.keys()):
-        print "gene_block ", gene_block 
+        #print "gene_block ", gene_block 
         result.update({gene_block:{}})
         org_list = event_reporting_data_structure[gene_block]
         # use the magic that is itertools to make an iterable for all combinations of two organisms for compairison 
@@ -410,7 +410,7 @@ def return_event_counts_as_dict(event_reporting_data_structure):
             
             # There is a faster implementation that uses a try except... which i have been kind enough to include if speed is you thing.
             # on small lists of organisms it really does not matter
-                '''if org1 in result[gene_block].keys():
+            '''if org1 in result[gene_block].keys():
                 result[gene_block][org1].update({org2:{'deletions':deletions, 'duplications':duplications, 'splits':splits}})
             else:
                 result[gene_block].update({org1:{org2:{'deletions':deletions, 'duplications':duplications, 'splits':splits}}})
@@ -443,7 +443,7 @@ def return_rearrangements(sorted_gene_block_results, org1, org2):
 def make_gene_string_dict(gene_list):
     result = {}
     for gene, index in zip(gene_list, range(0,len(gene_list))):
-        print gene
+        #print gene
         result.update({gene:chr(65+index)})
     #print operon, result[operon], len(result)
     return result
@@ -507,7 +507,7 @@ def main():
     
     event_count_dict = return_event_counts_as_dict(event_reporting_data_structure)
     
-    print "Length", len(event_count_dict.keys()), event_count_dict.keys()
+    #print "Length", len(event_count_dict.keys()), event_count_dict.keys()
     
     #outfile = './event_dict.p'
     outfile = outfolder + 'event_dict.p'

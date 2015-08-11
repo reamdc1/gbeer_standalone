@@ -42,9 +42,7 @@ def parser_code():
 
     parser.add_argument("-r", "--refrence", dest="refrence", metavar="STRING", default = 'NC_000913',
                 help="Accession number of the refrence organism. This information is used to determine the product type of each gene (RNA/Protein), a necessary piece of information to classify the gene blocks that are under investigation.")
-               
-    parser.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
-                help="Suppresses most program text outputs.")
+
                        
     return parser.parse_args()
     
@@ -79,9 +77,7 @@ def check_options(parsed_args):
     # I am not checking this option here, just leave it as default for the time being.
     refrence_list = [parsed_args.refrence]
     
-    quiet = parsed_args.quiet
-    
-    return infolder, outfile, gene_block_file, num_proc, refrence_list, quiet
+    return infolder, outfile, gene_block_file, num_proc, refrence_list
 
 
 #this function will return all of the files that are in a directory. os.walk is recursive traversal.
@@ -606,10 +602,9 @@ def main():
 
     parsed_args = parser_code()
     
-    infolder, outfile, gene_block_file, num_proc, refrence_list, quiet = check_options(parsed_args)
+    infolder, outfile, gene_block_file, num_proc, refrence_list = check_options(parsed_args)
     
-    if not quiet:
-        print infolder, outfile, gene_block_file, num_proc, refrence_list, quiet
+    print infolder, outfile, gene_block_file, num_proc, refrence_list
     
     # This section of code will return a parsed gene block file as a dictionary keyed by gene block name
     #parsed_gene_block_file = './regulonDB/gene_block_names_and_genes_unfiltered.txt'
@@ -657,8 +652,7 @@ def main():
     
     # ./make_operon_query.py -i ./genomes/ 
 
-    if not quiet:
-        print time.time() - start
+    print time.time() - start
     
 if __name__ == '__main__':
     main()

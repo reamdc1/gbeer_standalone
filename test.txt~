@@ -1,0 +1,169 @@
+tmp_directory from create newick ./out/tree/msa_tmp/
+./genomes/ ./out/tree/ ./phylo_order.txt rpob
+orgs_with_marker 34
+common_to_accession_dict ['Campylobacter_jejuni', 'Bordetella_pertussis', 'Xanthomonas_axonopodis', 'Buchnera_aphidicola', 'Pseudomonas_syringae', 'Brucella_suis', 'Salmonella_enterica', 'Pseudomonas_putida', 'Agrobacterium_fabrum', 'Wolinella_succinogenes', 'Caulobacter_crescentus', 'Brucella_melitensis', 'Shewanella_oneidensis', 'Bordetella_parapertussis', 'Bradyrhizobium_diazoefficiens', 'Pseudomonas_aeruginosa', 'Xanthomonas_campestris', 'Escherichia_coli', 'Mesorhizobium_loti', 'Chromobacterium_violaceum', 'Haemophilus_influenzae', 'Pasteurella_multocida', 'Bordetella_bronchiseptica', 'Helicobacter_hepaticus', 'Ralstonia_solanacearum', 'Vibrio_parahaemolyticus', 'Yersinia_pestis', 'Candidatus_Blochmannia', 'Neisseria_meningitidis', 'Vibrio_vulnificus', 'Sinorhizobium_meliloti', 'Shigella_flexneri', 'Nitrosomonas_europaea', 'Xylella_fastidiosa']
+cline clustalw -infile=./out/tree/msa_tmp/distmat_marker.fa -tree
+NC_002927,Bordetella_bronchiseptica
+NC_002928,Bordetella_parapertussis
+NC_004917,Helicobacter_hepaticus
+NC_002163,Campylobacter_jejuni
+NC_005090,Wolinella_succinogenes
+NC_002516,Pseudomonas_aeruginosa
+NC_004578,Pseudomonas_syringae
+NC_002947,Pseudomonas_putida
+NC_004757,Nitrosomonas_europaea
+NC_005085,Chromobacterium_violaceum
+NC_002696,Caulobacter_crescentus
+NC_003295,Ralstonia_solanacearum
+NC_002929,Bordetella_pertussis
+NC_004347,Shewanella_oneidensis
+NC_005061,Candidatus_Blochmannia
+NC_002663,Pasteurella_multocida
+NC_000907,Haemophilus_influenzae
+NC_003198,Salmonella_enterica
+NC_000913,Escherichia_coli
+NC_004741,Shigella_flexneri
+NC_003143,Yersinia_pestis
+NC_011833,Buchnera_aphidicola
+NC_004459,Vibrio_vulnificus
+NC_004603,Vibrio_parahaemolyticus
+NC_012441,Brucella_melitensis
+NC_004310,Brucella_suis
+NC_002678,Mesorhizobium_loti
+NC_003047,Sinorhizobium_meliloti
+NC_003062,Agrobacterium_fabrum
+NC_007086,Xanthomonas_campestris
+NC_002488,Xylella_fastidiosa
+NC_004463,Bradyrhizobium_diazoefficiens
+NC_003112,Neisseria_meningitidis
+NC_003919,Xanthomonas_axonopodis
+accession_to_common_outfile ./out/tree/accession_to_common.csv
+phylo_order_new_outfile ./out/tree/phylo_order_new.txt
+35.1475448608
+./genomes/ ./out/regulonDB/ ./phylo_order.txt 8 True http://regulondb.ccg.unam.mx/menu/download/datasets/files/OperonSet.txt True 5
+Download
+rejected operon  dicB-ydfDE-insD-intQ
+rejected operon  gltI-sroC-gltJKL
+rejected operon  ilvLXG_1G_2MEDA
+rejected operon  metT-leuW-glnUW-metU-glnVX
+rejected operon  metY-rimP-nusA-infB-rbfA-truB-rpsO-pnp
+rejected operon  phnCDE_1E_2FGHIJKLMNOP
+rejected operon  sgrR-sroA-tbpA-thiPQ
+rejected operon  waaQGPSBOJYZU
+11.5803060532
+tmp_directory from create newick ./out/tree/msa_tmp/
+./genomes/ ./out/tree/ ./phylo_order.txt rpob
+orgs_with_marker 34
+common_to_accession_dict ['Campylobacter_jejuni', 'Bordetella_pertussis', 'Xanthomonas_axonopodis', 'Buchnera_aphidicola', 'Pseudomonas_syringae', 'Brucella_suis', 'Salmonella_enterica', 'Pseudomonas_putida', 'Agrobacterium_fabrum', 'Wolinella_succinogenes', 'Caulobacter_crescentus', 'Brucella_melitensis', 'Shewanella_oneidensis', 'Bordetella_parapertussis', 'Bradyrhizobium_diazoefficiens', 'Pseudomonas_aeruginosa', 'Xanthomonas_campestris', 'Escherichia_coli', 'Mesorhizobium_loti', 'Chromobacterium_violaceum', 'Haemophilus_influenzae', 'Pasteurella_multocida', 'Bordetella_bronchiseptica', 'Helicobacter_hepaticus', 'Ralstonia_solanacearum', 'Vibrio_parahaemolyticus', 'Yersinia_pestis', 'Candidatus_Blochmannia', 'Neisseria_meningitidis', 'Vibrio_vulnificus', 'Sinorhizobium_meliloti', 'Shigella_flexneri', 'Nitrosomonas_europaea', 'Xylella_fastidiosa']
+cline clustalw -infile=./out/tree/msa_tmp/distmat_marker.fa -tree
+NC_002927,Bordetella_bronchiseptica
+NC_002928,Bordetella_parapertussis
+NC_004917,Helicobacter_hepaticus
+NC_002163,Campylobacter_jejuni
+NC_005090,Wolinella_succinogenes
+NC_002516,Pseudomonas_aeruginosa
+NC_004578,Pseudomonas_syringae
+NC_002947,Pseudomonas_putida
+NC_004757,Nitrosomonas_europaea
+NC_005085,Chromobacterium_violaceum
+NC_002696,Caulobacter_crescentus
+NC_003295,Ralstonia_solanacearum
+NC_002929,Bordetella_pertussis
+NC_004347,Shewanella_oneidensis
+NC_005061,Candidatus_Blochmannia
+NC_002663,Pasteurella_multocida
+NC_000907,Haemophilus_influenzae
+NC_003198,Salmonella_enterica
+NC_000913,Escherichia_coli
+NC_004741,Shigella_flexneri
+NC_003143,Yersinia_pestis
+NC_011833,Buchnera_aphidicola
+NC_004459,Vibrio_vulnificus
+NC_004603,Vibrio_parahaemolyticus
+NC_012441,Brucella_melitensis
+NC_004310,Brucella_suis
+NC_002678,Mesorhizobium_loti
+NC_003047,Sinorhizobium_meliloti
+NC_003062,Agrobacterium_fabrum
+NC_007086,Xanthomonas_campestris
+NC_002488,Xylella_fastidiosa
+NC_004463,Bradyrhizobium_diazoefficiens
+NC_003112,Neisseria_meningitidis
+NC_003919,Xanthomonas_axonopodis
+accession_to_common_outfile ./out/tree/accession_to_common.csv
+phylo_order_new_outfile ./out/tree/phylo_order_new.txt
+34.6527709961
+10.6445109844
+The operon file ./out/regulonDB/gene_block_names_and_genes.txt does not exist.
+The file ./out/gene_block_query.fa does not exist.
+The file ./out/regulonDB/gene_block_names_and_genes.txt does not exist.
+./out/blast_parse/ ./out/optimized_gene_blocks/  8 1e-10 500
+./out/blast_parse/fucPIKUR.txt
+./out/blast_parse/rbsDACBKR.txt
+./out/blast_parse/livKHMGF.txt
+./out/blast_parse/gcl-hyi-glxR-ybbW-allB-ybbY-glxK.txt
+./out/blast_parse/casABCDE12.txt
+./out/blast_parse/lsrACDBFG-tam.txt
+./out/blast_parse/tdcABCDEFG.txt
+./out/blast_parse/flgBCDEFGHIJ.txt
+./out/blast_parse/bamA-skp-lpxD-fabZ-lpxAB-rnhB-dnaE.txt
+./out/blast_parse/ydhYVWXUT.txt
+./out/blast_parse/hisLGDCBHAFI.txt
+./out/blast_parse/rnc-era-recO-pdxJ-acpS.txt
+./out/blast_parse/ybgIJKL-nei.txt
+./out/blast_parse/fliFGHIJK.txt
+./out/blast_parse/hypABCDE-fhlA.txt
+./out/blast_parse/paaABCDEFGHIJK.txt
+./out/blast_parse/caiTABCDE.txt
+./out/blast_parse/dppABCDF.txt
+./out/blast_parse/hyfABCDEFGHIJR-focB.txt
+./out/blast_parse/hycABCDEFGHI.txt
+./out/blast_parse/puuDRCBE.txt
+./out/blast_parse/lptD-surA-pdxA-rsmA-apaGH.txt
+./out/blast_parse/thiCEFSGH.txt
+./out/blast_parse/hcaEFCBD.txt
+./out/blast_parse/thrS-infC-rpmI-rplT-pheMST-ihfA.txt
+./out/blast_parse/fecABCDE.txt
+./out/blast_parse/cyoABCDE.txt
+./out/blast_parse/pstSCAB-phoU.txt
+./out/blast_parse/yceD-rpmF-plsX-fabHDG-acpP-fabF.txt
+./out/blast_parse/ulaABCDEF.txt
+./out/blast_parse/nuoABCEFGHIJKLMN.txt
+./out/blast_parse/mdtABCD-baeSR.txt
+./out/blast_parse/ivbL-ilvBN-uhpABC.txt
+./out/blast_parse/yjeF-tsaE-amiB-mutL-miaA-hfq-hflXKC.txt
+./out/blast_parse/sdhCDAB-sucABCD.txt
+./out/blast_parse/atpIBEFHAGDC.txt
+./out/blast_parse/leuLABCD.txt
+./out/blast_parse/yrbG-kdsDC-lptCAB-rpoN-hpf-ptsN-rapZ-npr.txt
+./out/blast_parse/pspABCDE.txt
+./out/blast_parse/glcDEFGBA.txt
+./out/blast_parse/chbBCARFG.txt
+./out/blast_parse/nsrR-rnr-rlmB-yjfIJ.txt
+./out/blast_parse/nanATEK-yhcH.txt
+./out/blast_parse/cysPUWAM.txt
+./out/blast_parse/astCADBE.txt
+./out/blast_parse/yiaKLMNO-lyxK-sgbHUE.txt
+./out/blast_parse/gatYZABCD.txt
+./out/blast_parse/trpLEDCBA.txt
+./out/blast_parse/menFDHBCE.txt
+./out/blast_parse/ydgK-rsxABCDGE-nth.txt
+./out/blast_parse/ssuEADCB.txt
+./out/blast_parse/glgBXCAP.txt
+./out/blast_parse/hyaABCDEF.txt
+./out/blast_parse/srlAEBD-gutM-srlR-gutQ.txt
+./out/blast_parse/rplKAJL-rpoBC.txt
+5.51127195358
+The file ./out/regulonDB/gene_block_names_and_genes.txt does not exist.
+outfolder ./out/
+./genomes/ NONE ./out/ ./phylo_order.txt 8 5 500 1e-10 NONE False
+project_regulon_outfolder  ./out/regulonDB/
+cmd1 ./regulondb_dl_parse.py -f ./phylo_order.txt -i ./genomes/ -o ./out/regulonDB/ -n 8 -u http://regulondb.ccg.unam.mx/menu/download/datasets/files/OperonSet.txt -m 5
+gene_block_file ./out/regulonDB/gene_block_names_and_genes.txt
+cmd3 ./format_db.py --filter ./phylo_order.txt --genbank_directory ./genomes/ --outfolder ./out/db/ --num_proc 8
+cmd4 ./make_operon_query.py -i ./genomes/ -o ./out/gene_block_query.fa -p ./out/regulonDB/gene_block_names_and_genes.txt -n 8 -r NC_000913
+cmd5 ./blast_script.py --database_folder ./out/db/ --outfolder ./out/blast_result/ --filter ./phylo_order.txt --num_proc 8 --query ./out/gene_block_query.fa --eval 1e-10
+cmd6 ./blast_parse.py --infolder ./out/blast_result/ --outfolder ./out/blast_parse/ --gene_block_query ./out/regulonDB/gene_block_names_and_genes.txt --num_proc 8
+cmd7 ./filter_operon_blast_results.py --infolder ./out/blast_parse/ --outfolder ./out/optimized_gene_blocks/ --num_proc 8 --eval 1e-10 --max_gap 500
+cmd8 ./make_event_distance_matrix.py --gene_block_file ./out/regulonDB/gene_block_names_and_genes.txt --infolder ./out/optimized_gene_blocks/ --outfolder ./out/gene_block_distance_matrices/ --num_proc 8 --max_gap 500
+98.1901710033

@@ -4,6 +4,7 @@ import time
 import os
 import sys
 import argparse
+import shutil
 
 # Copyright(C) 2015 David Ream
 # Released under GPL version 3 licence. http://www.gnu.org/licenses/lgpl.html
@@ -11,7 +12,7 @@ import argparse
 
 
 #TODO:
-# 1) remove all instances of operon, change language to reflect that we are working on gene blocks
+# 1) change program names in the project to reflect gene blocks as our model
 # 2) add back the CD-hit functionality in "make_operon_query".  the coding is there, i just need to benchmark it against current results.
 # 3) rename this script, to whatever makes some sense... i actually like it how it is.
 
@@ -34,7 +35,7 @@ import argparse
 # These options will not be alterable in the command line of this script, but have values that may be useful to control.
 regulon_url = 'http://regulondb.ccg.unam.mx/menu/download/datasets/files/OperonSet.txt'
 regulon_outfolder = 'regulonDB/'
-regulon_default_gene_block_file = regulon_outfolder + 'operon_names_and_genes.txt'
+regulon_default_gene_block_file = regulon_outfolder + 'gene_block_names_and_genes.txt'
 
 # TODO: add this option as a command line arg for the gbeer standalone script
 regulon_experimental_only = True
@@ -102,11 +103,17 @@ BLAST_format_protein = 'True'
 # but will expand to include more organisms automagically.                                                  #
 #############################################################################################################
 
+# What follows is a list of options that are controlled by user inputs.
+#--num_proc
+
+# Controlled by the output from a pervious step
+# --infolder
+# --gene_block_file
 
 # not controlled by user inputs, but will be passed as a value to make_operon_query.py as a command line param for this script
-refrence_organism = 'NC_000913' # will possibly deprecate in the future, in leu of an alternative approach
-operon_query_outfile = 'operon_query.fa'
-
+gene_block_query_outfile = 'gene_block_query.fa' # --outfile
+# will possibly deprecate the next option in the future, in leu of an alternative approach
+refrence_organism = 'NC_000913' # --refrence
 
 #############################################################################################################
 # blast_script.py:                                                                                          #
@@ -193,7 +200,7 @@ visualization_outfolder = "visualization/"
 # This exists to  make the main function easier to read. It contains code to run the argument parser, and does nothing else.
 def parser_code():
     
-    parser = argparse.ArgumentParser(description='The purpose of this script is to run the full software suite that we have developed to study operons using as few inputs as possible.  This will facilitate the ease of use as much as possible.')
+    parser = argparse.ArgumentParser(description='The purpose of this script is to run the full software suite that we have developed to study gene blocks using as few inputs as possible.  This will facilitate the ease of use as much as possible.')
     
     # This option needs to carry a dual default. There should be 'NONE' to denote that there was no input. Further, there should be a secondary default where
     # the regulondb_parse script will put the output file. The variable location of this file can be found in the 'regulondb_dl_parse.py command line args:' section.
@@ -219,7 +226,7 @@ def parser_code():
                 help="Number of processors that you want this script to run on. The default is every CPU that the system has.")
 
     parser.add_argument("-m", "--min_genes", dest="min_genes", metavar="INT", default = 5, type=int,
-                help="Minum number of genes that an operon must contain before it can be considered for further analysis. The default is 5 because that is what we are currently using in the study.")
+                help="Minum number of genes that an gene_block must contain before it can be considered for further analysis. The default is 5 because that is what we are currently using in the study.")
     
     parser.add_argument("-g", "--max_gap", dest="max_gap", metavar="INT", default = 500, type=int,
                 help="Size in nucleotides of the maximum gap allowed between genes to be considered neighboring. The default is 500.")
@@ -234,6 +241,9 @@ def parser_code():
     
     parser.add_argument("-c", "--clean", dest="clean", default=False, action='store_true',
                 help="Flag to toggle the removal of intermediate files that are unnecessary for analysis, reducing the storage requirements for a run.")
+    
+    parser.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
+                help="Suppresses most program text outputs.")
                        
     return parser.parse_args()
     
@@ -261,7 +271,7 @@ def check_options(parsed_args):
        outfolder = parsed_args.outfolder
     if not os.path.isdir(outfolder):
         os.makedirs(outfolder)
-    print "outfolder", outfolder
+    #print "outfolder", outfolder
     
     
     if parsed_args.filter == 'NONE' or os.path.exists(parsed_args.filter):
@@ -309,96 +319,121 @@ def check_options(parsed_args):
     gene_block_file = parsed_args.gene_block_file
     
     clean = parsed_args.clean
+    quiet = parsed_args.quiet
 
     #return genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val
-    return genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean
+    return genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean, quiet
 
+# This function will clean up the output of the program so that intermediate files or directories are removed.
+# The major reason that this function exists is that a large number of debugging intermediate steps exist, and 
+# regular users of the program do not benefit from keeping this data, so i'm removing it.
+def cleanup_function(results_to_move, results_to_remove, outfolder):
+    for item in results_to_move:
+        if os.path.isdir(item): #The item is a directory to move to the output folder
+            folder_name = item.rstrip('/').split('/')[-1]
+            new_directory = outfolder + folder_name + '/'
+            shutil.copytree(item, new_directory)
+        else:
+            new_file_name = outfolder + os.path.basename(item)
+            shutil.copyfile(item, new_file_name)
     
+    for item in results_to_remove:
+        if os.path.isdir(item): #The item is a directory to remove
+            shutil.rmtree(item)
+        else:
+            os.remove(item) # The item to remove is a file
     
 def main():
     
     start = time.time()
+    
+    #list_files_remove = []
+    results_to_move = []
+    results_to_remove = []
 
     parsed_args = parser_code()
     
     #genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val = check_options(parsed_args)
-    genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean = check_options(parsed_args)
+    genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean, quiet = check_options(parsed_args)
     
     #print genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val
-    print genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean
+    if not quiet:
+        print genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean, quiet
     
     
-    # checking new order for the script
     ########################################################
-    # Step 2 fully checked and operational as of 7/21/2015 #
+    # Step 1 fully checked and operational as of 7/21/2015 #
+    # removed operon instances and print statements        #
     ########################################################
     
-    # Step 2: Create a phylogenetic tree from the organisms in the either the whole set provided in the genome directory, 
+    # Step 1: Create a phylogenetic tree from the organisms in the either the whole set provided in the genome directory, 
     # or from the organisms that are included in the organism filter file.  
     #TODO: 
     # 1) Make it possibel to choose a protein or RNA gene, currently only protein genes are accepted.
     # 2) Allow users to provide their own phylogenetic tree, and have the program use it, producing an accession list from the data if the tree lables are of a certain format
     #       2.1) options have been added to allow this.  the script needs to accomodate this option at this point.
-    
     project_tree_outfolder = outfolder + tree_outfolder.lstrip("./")
-    cmd2 = "./create_newick_tree.py --genbank_directory %s  --filter %s --outfolder %s --marker_gene %s" % (genbank_directory, filter_file, project_tree_outfolder, tree_marker_gene)
+    cmd1 = "./create_newick_tree.py --genbank_directory %s  --filter %s --outfolder %s --marker_gene %s" % (genbank_directory, filter_file, project_tree_outfolder, tree_marker_gene)
     #cmd2 = "./create_newick_tree.py --genbank_directory %s  -f %s" % (genbank_directory, filter_file)
-    # print "cmd2", cmd2
-    os.system(cmd2)
-    '''
+    if quiet:
+       cmd1 = cmd1 + " --quiet"
+    else:
+        print "cmd1", cmd1
     
-    '''    
+    
+    if tree_file != 'NONE':
+        cmd1 = cmd1 + " --tree %s" % tree_file
+    
+    os.system(cmd1)
+    
+    # There are no files/directories to delete from this stage
+
     ########################################################
-    # Step 1 fully checked and operational as of 7/13/2015 #
+    # Step 2 fully checked and operational as of 7/13/2015 #
+    # removed operon instances and print statements        #
     ########################################################
     
-    # Step 1: Get gene block set and parse into something that we can use
-    # currently the default is to get operons from regulon db and use them as the gene neighborhoods we are searching for
-    
+    # Step 2: Get gene block set and parse into something that we can use
+    # currently the default is to get operons from regulon db and use them as the gene blocks we are searching for
     
     if gene_block_file == "NONE": # run the regulon script
         #now we need to set the output file for this stage
         project_regulon_outfolder = outfolder + regulon_outfolder
-        print "project_regulon_outfolder ", project_regulon_outfolder 
-        if regulon_experimental_only:
-            cmd1 = "./regulondb_dl_parse.py -f %s -i %s -o %s -n %i -u %s -m %i" % (filter_file, genbank_directory, project_regulon_outfolder, num_proc, regulon_url, min_genes)
-        else:
-            cmd1 = "./regulondb_dl_parse.py -f %s -i %s -o %s -n %i -u %s -m %i --experimantal_only" % (filter_file, genbank_directory, project_regulon_outfolder, num_proc, regulon_url, min_genes)
-    	print "cmd1", cmd1
-    	
-    	#cmd1 = "./regulondb_dl_parse.py -f phylo_order.txt"
-    	os.system(cmd1)
+        #print "project_regulon_outfolder ", project_regulon_outfolder 
+        cmd2 = "./regulondb_dl_parse.py --filter %s --infolder %s --outfolder %s --num_proc %i --url %s --min_genes %i" % (filter_file, genbank_directory, project_regulon_outfolder, num_proc, regulon_url, min_genes)
+        if not regulon_experimental_only:
+            cmd2 = cmd2 + " --experimantal_only"
+
+    	#cmd2 = "./regulondb_dl_parse.py -f phylo_order.txt"
+    	if quiet:
+    	    cmd2 = cmd2 + " --quiet"
+    	else:
+    	    print "cmd2", cmd2
+    	os.system(cmd2)
     	gene_block_file = outfolder + regulon_default_gene_block_file
     	
     else: # do not run the regulon script, use the user-supplied file instead
         pass
-    print "gene_block_file", gene_block_file
+    #print "gene_block_file", gene_block_file
     
-    
-    ########################################################
-    # Step 2 fully checked and operational as of 7/21/2015 #
-    ########################################################
-    
-    # Step 2: Create a phylogenetic tree from the organisms in the either the whole set provided in the genome directory, 
-    # or from the organisms that are included in the organism filter file.  
-    #TODO: 
-    # 1) Make it possibel to choose a protein or RNA gene, currently only protein genes are accepted.
-    # 2) Allow users to provide their own phylogenetic tree, and have the program use it, producing an accession list from the data if the tree lables are of a certain format
-    #       2.1) options have been added to allow this.  the script needs to accomodate this option at this point.
-    
-    project_tree_outfolder = outfolder + tree_outfolder.lstrip("./")
-    cmd2 = "./create_newick_tree.py --genbank_directory %s  --filter %s --outfolder %s --marker_gene %s" % (genbank_directory, filter_file, project_tree_outfolder, tree_marker_gene)
-    #cmd2 = "./create_newick_tree.py --genbank_directory %s  -f %s" % (genbank_directory, filter_file)
-    # print "cmd2", cmd2
-    os.system(cmd2)
-    
+    #The gene block file is useful to anyone doing further analysis, so I have chosen to keep this ile, the rest of the files that are created can be removed
+    results_to_move.append(gene_block_file)
+    # The directory that is created (project_regulon_outfolder) can have its contents removed, as no other files are currently useful
+    results_to_remove.append(project_regulon_outfolder)
     
     ########################################################
     # Step 3 fully checked and operational as of 7/23/2015 #
+    # removed operon instances and print statements        #
     ########################################################
     
     #Step 3: Create BLAST searchable databases. (I am limiting this to protein databases right now since that is what we do in the paper)
     project_BLAST_database_folder = outfolder + BLAST_database_folder
+    
+    # BLAST databases are not necessary to keep, unless I add an option to explicitly provide them.  This should be deleted, as the databases are large
+    # TODO: if the databases are an option the user can provide, add logic to choose deletion for only programatically created databases
+    # Do this step when the project_BLAST_database_folderis set immediately above.
+    results_to_remove.append(project_BLAST_database_folder)
+    
     cmd3 = "./format_db.py --filter %s --genbank_directory %s --outfolder %s --num_proc %i" % (filter_file, genbank_directory, project_BLAST_database_folder,  num_proc)
     
     # Set the database formatting option[Protein or DNA], even though we don't use it (yet).  verified working 7/22/2015
@@ -406,26 +441,40 @@ def main():
         pass
     else:
         cmd3 = cmd3 + ' -d'
-    print "cmd3", cmd3
+    if quiet:
+        cmd3 = cmd3 + " --quiet"
+    else:
+        print "cmd3", cmd3
     os.system(cmd3)
     
+    # BLAST databases are not necessary to keep, unless I add an option to explicitly provide them.  This should be deleted, as the databases are large
+    #results_to_remove.append(project_BLAST_database_folder)
     
+    ########################################################
+    # Step 4 version 1 checked as of 8/7/2015              #
+    # removed most operon instances, I need to check print #
+    ########################################################
     
+    # TODO:  fix the rest of the operon references in this script, there are only a few that are left.
     #Step 4: make the operon query fasta file(s)
-    operon_file = regulon_outfolder + 'operon_names_and_genes.txt'
+    gene_block_file = project_regulon_outfolder + 'gene_block_names_and_genes.txt'
     
     #This is the only outfile for this stage.  I don't think this needs its own seperate output directory, since this file is potentialy useful
     # to a user after the program is run.
-    project_operon_query_outfile = outfolder + operon_query_outfile
+    project_gene_block_query_outfile = outfolder + gene_block_query_outfile
     
-    #cmd4 = "./make_operon_query.py -i %s -o %s -p %s -n %i -r %s" % (genbank_directory, operon_query_outfile, operon_file, num_proc, refrence_organism)
-    cmd4 = "./make_operon_query.py -i %s -o %s -p %s -n %i -r %s" % (genbank_directory, project_operon_query_outfile, gene_block_file, num_proc, refrence_organism)
-    print "cmd4", cmd4
+    cmd4 = "./make_operon_query.py --infolder %s --outfile %s --gene_block_file %s --num_proc %i --refrence %s" % (genbank_directory, project_gene_block_query_outfile, gene_block_file, num_proc, refrence_organism)
+    if quiet:
+        cmd4 = cmd4 + " --quiet"
+    else:
+        print "cmd4", cmd4
     os.system(cmd4)
     
+    # The resulting file is useful, so no cleaning is not necessary
     
     ########################################################
     # Step 5 fully checked and operational as of 7/24/2015 #
+    # removed operon instances and print statements        #
     ########################################################
     
     #Step 5: run BLAST with the query that we made in stage 3, using the databases that we produced in stage 2.
@@ -434,36 +483,57 @@ def main():
     
     project_BLAST_outfolder = outfolder + BLAST_outfolder
     
-    #cmd5 = "./blast_script.py -d %s -o %s -f %s -n %i -q %s -e %f" % (BLAST_database_folder, blast_outfolder, filter_file, num_proc, operon_query_outfile, e_val)
-    #cmd5 = "./blast_script.py --database_folder %s --outfolder %s --filter %s --num_proc %i --query %s --eval %f" % (project_BLAST_database_folder, project_BLAST_outfolder, filter_file, num_proc, project_operon_query_outfile, e_val)
+    #cmd5 = "./blast_script.py -d %s -o %s -f %s -n %i -q %s -e %f" % (BLAST_database_folder, blast_outfolder, filter_file, num_proc, gene_block_query_outfile, e_val)
+    #cmd5 = "./blast_script.py --database_folder %s --outfolder %s --filter %s --num_proc %i --query %s --eval %f" % (project_BLAST_database_folder, project_BLAST_outfolder, filter_file, num_proc, project_gene_block_query_outfile, e_val)
     
-    #cmd5 = "./blast_script.py --database_folder %s --outfolder %s --filter %s --num_proc %i --query %s --eval %f" % (project_BLAST_database_folder, project_BLAST_outfolder, filter_file, num_proc, project_operon_query_outfile, e_val)
-    cmd5 = "./blast_script.py --database_folder %s --outfolder %s --filter %s --num_proc %i --query %s --eval %s" % (project_BLAST_database_folder, project_BLAST_outfolder, filter_file, num_proc, project_operon_query_outfile, e_val)
-    print "cmd5", cmd5
+    #cmd5 = "./blast_script.py --database_folder %s --outfolder %s --filter %s --num_proc %i --query %s --eval %f" % (project_BLAST_database_folder, project_BLAST_outfolder, filter_file, num_proc, project_gene_block_query_outfile, e_val)
+    cmd5 = "./blast_script.py --database_folder %s --outfolder %s --filter %s --num_proc %i --query %s --eval %s" % (project_BLAST_database_folder, project_BLAST_outfolder, filter_file, num_proc, project_gene_block_query_outfile, e_val)
+    if quiet:
+        cmd5 = cmd5 + " --quiet"
+    else:
+        print "cmd5", cmd5
     os.system(cmd5)
     
+    # The resulting directory is not necessary, so we may remove if the option is selected.
+    results_to_remove.append(project_BLAST_outfolder)
+    
+    ########################################################
+    # Step 6 fully checked and operational as of 8/9/2015  #
+    # though it had been a while ago.                      #
+    # removed operon instances and print statements        #
+    ########################################################
     
     # Step 6: Parse the BLAST result and sort it by gene block
     
     project_BLAST_parse_outfolder = outfolder + BLAST_parse_outfolder 
     
     #cmd6 = "./blast_parse.py -f %s -n %i" % (filter_file, num_proc)
-    #cmd6 = "./blast_parse.py --infolder %s --outfolder %s --gene_block_query %s --num_proc %i" % (project_BLAST_outfolder, project_BLAST_parse_outfolder, project_operon_query_outfile, num_proc)
+    #cmd6 = "./blast_parse.py --infolder %s --outfolder %s --gene_block_query %s --num_proc %i" % (project_BLAST_outfolder, project_BLAST_parse_outfolder, project_gene_block_query_outfile, num_proc)
     
     cmd6 = "./blast_parse.py --infolder %s --outfolder %s --gene_block_query %s --num_proc %i" % (project_BLAST_outfolder, project_BLAST_parse_outfolder, gene_block_file, num_proc)
-    print "cmd6", cmd6
+    if quiet:
+        cmd6 = cmd6 + " --quiet"
+    else:
+        print "cmd6", cmd6
     os.system(cmd6)
     
+    # The resulting directory is not necessary, so we may remove if the option is selected.
+    results_to_remove.append(project_BLAST_parse_outfolder)
     
     # Step 7: filter out spurious results and report the gene blocks that best represent the origional.
     
     project_filter_BLAST_parse_outfolder = outfolder +  filter_BLAST_parse_outfolder
-    #cmd7 = "./filter_operon_blast_results.py -n %i -g %i" % (num_proc, max_gap)
-    #cmd7 = "./filter_operon_blast_results.py --infolder %s --outfolder %s --num_proc %i --eval %f --max_gap %i" % (project_BLAST_parse_outfolder, project_filter_BLAST_parse_outfolder, num_proc, e_val, max_gap)
+    #cmd7 = "./filter_gene_block_blast_results.py -n %i -g %i" % (num_proc, max_gap)
+    #cmd7 = "./filter_gene_block_blast_results.py --infolder %s --outfolder %s --num_proc %i --eval %f --max_gap %i" % (project_BLAST_parse_outfolder, project_filter_BLAST_parse_outfolder, num_proc, e_val, max_gap)
     cmd7 = "./filter_operon_blast_results.py --infolder %s --outfolder %s --num_proc %i --eval %s --max_gap %i" % (project_BLAST_parse_outfolder, project_filter_BLAST_parse_outfolder, num_proc, e_val, max_gap)
-    print "cmd7", cmd7
+    if quiet:
+        cmd7 = cmd7 + " --quiet"
+    else:
+        print "cmd7", cmd7
     os.system(cmd7)
     
+    # TODO: decide on this option for cleaning.
+    # The resulting directory is useful/not useful... not sure, but i will not add to the list yet
     
     ##########################################################################
     # seems to be running through step 8correctly no through testing yet.    #
@@ -476,10 +546,15 @@ def main():
     # This input will need to be altered to explicity take in the file created in 7... but for now the default will do.
     #cmd8 = "./make_event_distance_matrix.py"
     cmd8 = "./make_event_distance_matrix.py --gene_block_file %s --infolder %s --outfolder %s --num_proc %i --max_gap %i" % (gene_block_file, project_filter_BLAST_parse_outfolder, project_event_distance_outfolder, num_proc, max_gap)
-    print "cmd8", cmd8
+    if quiet:
+        cmd8 = cmd8 + " --quiet"
+    else:
+        print "cmd8", cmd8
     os.system(cmd8)
     
+    # The resulting directory contains only one file, and it is not the most useful file for a user. it is small though, so i'm leaning toward keeping.
     
+    '''
     # Step 9: Run the visualization pipelilne using the pairwaise event matrix that is calculated in step 7
     
     project_visualization_outfolder = outfolder + visualization_outfolder
@@ -502,13 +577,17 @@ def main():
     #cmd9 = "./operonVisual.py -n ./optimized_operon/ -m ./mapping.csv -t ./out_tree.nwk -e./event_dict.p -o ./visual"
     #cmd9 = "./operonVisual.py --OperonDataDirectory %s --MappingFile %s --NewickTree %s --EventsDict %s --OutputDirectory %s" % (project_event_distance_outfolder, project_mapping_file, project_tree_file, project_event_dict, project_visualization_outfolder)
     cmd9 = "./operonVisual.py --OperonDataDirectory %s --MappingFile %s --NewickTree %s --EventsDict %s --OutputDirectory %s" % (project_filter_BLAST_parse_outfolder, project_mapping_file, project_tree_file, project_event_dict, project_visualization_outfolder)
-    
-    print "cmd9", cmd9
+    if not quiet:
+        print "cmd9", cmd9
     os.system(cmd9)
-    
-    
-    
-    print time.time() - start
+    '''
+    print "results_to_move", results_to_move, "results_to_remove", results_to_remove
+    if clean:
+        cleanup_function(results_to_move, results_to_remove, outfolder)
+        
+        
+    if not quiet:
+        print time.time() - start
     
 if __name__ == '__main__':
     main()

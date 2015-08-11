@@ -25,8 +25,8 @@ def parser_code():
     
     # rename this option to gene block file... or something more accurately conveying the idea that this is the file
     # that is composed: gene_block_name: gene1, gene2, gene3... etc all fields tab delenated.
-    parser.add_argument("-q", "--gene_block_query", dest="gene_block_query", default='./regulonDB/operon_names_and_genes.txt', metavar="FILE",
-                help="A file that contains the names and genes comprising the operons that are under investigation.")
+    parser.add_argument("-b", "--gene_block_query", dest="gene_block_query", default='./regulonDB/gene_block_names_and_genes.txt', metavar="FILE",
+                help="A file that contains the names and genes comprising the gene blocks that are under investigation.")
 
     parser.add_argument("-f", "--filter", dest="filter", default='', metavar="FILE",
                 help="A file that contains the accession numbers of the organisms that are under investigation.")            
@@ -34,6 +34,9 @@ def parser_code():
     parser.add_argument("-n", "--num_proc", dest="num_proc", metavar="INT", default = os.sysconf("SC_NPROCESSORS_CONF"), type=int,
                 help="Number of processors that you want this script to run on. The default is every CPU that the system has.")
                 
+    parser.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
+                help="Suppresses most program text outputs.")
+                            
     return parser.parse_args()
 
 
@@ -41,7 +44,7 @@ def check_options(parsed_args):
     if os.path.isdir(parsed_args.infolder):
         infolder = parsed_args.infolder
     else:
-        print "The folder %s does not exist." % parsed_args.infolder
+        print "The infolder directory %s does not exist." % parsed_args.infolder
         sys.exit()
     
     # if the directory that the user specifies does not exist, then the program makes it for them. 
@@ -54,7 +57,7 @@ def check_options(parsed_args):
     if os.path.exists(parsed_args.gene_block_query):
         gene_block_query = parsed_args.gene_block_query
     else:
-        print "The file %s does not exist." % parsed_args.gene_block_query
+        print "The gene block query file %s does not exist." % parsed_args.gene_block_query
         sys.exit()
     
     
@@ -63,7 +66,7 @@ def check_options(parsed_args):
     elif parsed_args.filter == '':
         filter_file = parsed_args.filter
     else:
-        print "The file %s does not exist." % parsed_args.filter
+        print "The filter file %s does not exist." % parsed_args.filter
         sys.exit()
         
     # section of code that deals determining the number of CPU cores that will be used by the program
@@ -73,9 +76,10 @@ def check_options(parsed_args):
         num_proc = 1
     else:
         num_proc = int(parsed_args.num_proc)
-        
+    
+    quiet = parsed_args.quiet    
 
-    return infolder, outfolder, gene_block_query, filter_file, num_proc
+    return infolder, outfolder, gene_block_query, filter_file, num_proc, quiet
 
 
 #this function will return all of the files that are in a directory. os.walk is recursive traversal.
@@ -91,11 +95,11 @@ def returnRecursiveDirFiles(root_dir):
 
 # The filter file here i think should be either a vacant value (such as '') or a user defined
 # value.  I do not think by default it should be given, like I have made the default behavior.    
-def parallel_blast_parse_dict(in_folder, out_folder, num_proc, filter_file, operon_dict):
+def parallel_blast_parse_dict(in_folder, out_folder, num_proc, filter_file, gene_block_dict):
     result = {}
-    operon_out_folder = out_folder
-    if not os.path.isdir(operon_out_folder):
-        os.makedirs(operon_out_folder)
+    gene_block_out_folder = out_folder
+    if not os.path.isdir(gene_block_out_folder):
+        os.makedirs(gene_block_out_folder)
     if filter_file != '':
         tmp = returnRecursiveDirFiles(in_folder)
         nc_list = [i.strip() for i in open(filter_file).readlines()]
@@ -110,7 +114,7 @@ def parallel_blast_parse_dict(in_folder, out_folder, num_proc, filter_file, oper
             try:
                 hlog = Homolog.from_blast(line)
             except:
-                print "ERROR", line
+                print "Error in function parallel_blast_parse_dict from script blast_parse.py, conversion from result to Homolog class failed.", line
             #hlog.Print()
             
             # this might have to be changed.... 
@@ -118,46 +122,46 @@ def parallel_blast_parse_dict(in_folder, out_folder, num_proc, filter_file, oper
             try:
                 accession = hlog.accession()
             except:
-                print line
+                print "There was an error in the Homolog class, found in line function parallel_blast_parse_dict from script blast_parse.py"
             
             
             #predicted_gene = hlog.blast_annatation()
             predicted_gene = hlog.blast_annotation()
             
             '''
-            try: # faster implementation than "if predicted_gene in operon_dict.keys():"
-                operon = operon_dict[predicted_gene]
-                # Debugging the missing operon casABCDE12... no idea right now.
-                if operon == 'casABCDE12':
+            try: # faster implementation than "if predicted_gene in gene_block_dict.keys():"
+                gene_block = gene_block_dict[predicted_gene]
+                # Debugging the missing gene block casABCDE12... no idea right now.
+                if gene_block == 'casABCDE12':
                     print 'AFDFAFDSF'
-                if operon in result.keys():    # check if the operon is in the result dict already, if not make a new entry in the else clause
-                    if accession in result[operon].keys(): # Check if the organism has been added to the operon
-                        result[operon][accession].append(hlog.ret_str())
-                    else: # if the organims is not part of the operon, add it
-                        result[operon].update({accession:[hlog.ret_str()]})
-                else: # add the operon to the result
-                    result.update({operon: {accession: [hlog.ret_str()]}})
+                if gene_block in result.keys():    # check if the gene block is in the result dict already, if not make a new entry in the else clause
+                    if accession in result[gene_block].keys(): # Check if the organism has been added to the gene block
+                        result[gene_block][accession].append(hlog.ret_str())
+                    else: # if the organim has not been added to the rest yet, add it
+                        result[gene_block].update({accession:[hlog.ret_str()]})
+                else: # add the gene block to the result
+                    result.update({gene_block: {accession: [hlog.ret_str()]}})
             except:
                 pass
                 
             '''
-            try: # faster implementation than "if predicted_gene in operon_dict.keys():"
-                operon = operon_dict[predicted_gene]
-                # Debugging the missing operon casABCDE12... no idea right now.
+            try: # faster implementation than "if predicted_gene in gene_block_dict.keys():"
+                gene_block = gene_block_dict[predicted_gene]
+                # Debugging the missing gene block casABCDE12... no idea right now.
                 # ok, it's there, so omitting this, leaving the comment in for the time being though
-                #if operon == 'casABCDE12':
+                #if gene_block == 'casABCDE12':
                 #    print 'AFDFAFDSF'
-                if operon in result.keys():    # check if the operon is in the result dict already, if not make a new entry in the else clause
-                    if accession in result[operon].keys(): # Check if the organism has been added to the operon
-                        result[operon][accession].append(hlog.to_file())
-                    else: # if the organims is not part of the operon, add it
-                        result[operon].update({accession:[hlog.to_file()]})
-                else: # add the operon to the result
-                    result.update({operon: {accession: [hlog.to_file()]}})
+                if gene_block in result.keys():    # check if the gene block is in the result dict already, if not make a new entry in the else clause
+                    if accession in result[gene_block].keys(): # Check if the organism has been added to the gene block
+                        result[gene_block][accession].append(hlog.to_file())
+                    else: # if the organims is not part of the gene block, add it
+                        result[gene_block].update({accession:[hlog.to_file()]})
+                else: # add the gene_block to the result
+                    result.update({gene_block: {accession: [hlog.to_file()]}})
             except:
                 pass
             
-    print sorted(result.keys()), len(result)
+    #print sorted(result.keys()), len(result)
     
     '''
     # For the time being, i am going to cause each intermediate step in this pipeline to save in a folder called intermediate_for_debug
@@ -165,40 +169,41 @@ def parallel_blast_parse_dict(in_folder, out_folder, num_proc, filter_file, oper
     if not os.path.isdir(intermediate_folder):
         os.makedirs(intermediate_folder)
     
-    # For this step i will save the result in 'unfiltered_operon/'
+    # For this step i will save the result in 'unfiltered_gene_block/'
     
-    unfilter_folder = 'unfiltered_operon/'
+    unfilter_folder = 'unfiltered_gene_block/'
     if not os.path.isdir(intermediate_folder + unfilter_folder):
         os.makedirs(intermediate_folder + unfilter_folder)
     '''    
-    for operon in result.keys():
+    for gene_block in result.keys():
         
         # this code is omitted because it used to debugging purposes, and is currently unneeded
         '''
-    	outfile = intermediate_folder + unfilter_folder + operon + '.txt'
+    	outfile = intermediate_folder + unfilter_folder + gene_block + '.txt'
         #print "outfile", outfile
         handle = open(outfile, 'w')
         
-        for accession in result[operon].keys():
-        	handle.write('\n'.join(result[operon][accession]) + '\n')
+        for accession in result[gene_block].keys():
+        	handle.write('\n'.join(result[gene_block][accession]) + '\n')
         handle.close()
         '''
         
         # save results where i actually want them to go:
-        print "plast_parse.py outfile", out_folder + operon + '.txt'
-        handle = open(out_folder + operon + '.txt', 'w')
-        for accession in result[operon].keys():
-        	handle.write('\n'.join(result[operon][accession]) + '\n')
+        #print "plast_parse.py outfile", out_folder + gene_block + '.txt'
+        handle = open(out_folder + gene_block + '.txt', 'w')
+        for accession in result[gene_block].keys():
+        	handle.write('\n'.join(result[gene_block][accession]) + '\n')
         handle.close()
-
+        
+        
 # I have to figure out a better name for this function. The jist of what I am doing here is as follows:
 # First, I will provide a file name that contains all of the hits for every organism that we are interested in.
 # Then it sorts this homolog list first by organism, then by locus. (By the required input, the files already have 
-# been screened for both eval cutoff and operon membership. The function will then return a dictionary for that
-# operon. The intention is that this data structure will then be used to find the best hit for the locus out of the
+# been screened for both eval cutoff and gene block membership. The function will then return a dictionary for that
+# gene block. The intention is that this data structure will then be used to find the best hit for the locus out of the
 # many redundant hits, however this functionality will be handled another function that i have yet to write/test.
-def return_operon_list(fname):
-    operon = fname.split('/')[-1].split('.')[0]
+def return_gene_block_list(fname):
+    gene_block = fname.split('/')[-1].split('.')[0]
     hlog_list = [Homolog.from_file(i.strip()) for i in open(fname).readlines()]
     result_dict = {}
     for hlog in hlog_list:
@@ -214,65 +219,67 @@ def return_operon_list(fname):
     
     return result_dict
         
-
+# currently not used
+'''
 # might  not use this: will see
-def parallel_return_operon_list(infolder, outfolder, num_proc):
+def parallel_return_gene_block_list(infolder, outfolder, num_proc):
     pool = Pool(processes = num_proc)
-    organism_dict_for_recovery = dict(pool.map(parallel_operon_fasta, genome_of_interest_list))
+    organism_dict_for_recovery = dict(pool.map(parallel_gene_block_fasta, genome_of_interest_list))
+'''
 
-
-# This function will take the organism-locus dict (per operon file) and determine the best homolog.
-# 
-def best_homolog_list(operon_dict, outfile):
+# This function will take the organism-locus dict (per gene block file) and determine the best homolog.
+def best_homolog_list(gene_block_dict, outfile):
     result = []
     
-    for org in sorted(operon_dict.keys()):
-        for locus in sorted(operon_dict[org].keys()):
-            hlog_list = operon_dict[org][locus][1:]
-            best_hit = operon_dict[org][locus][0]
+    for org in sorted(gene_block_dict.keys()):
+        for locus in sorted(gene_block_dict[org].keys()):
+            hlog_list = gene_block_dict[org][locus][1:]
+            best_hit = gene_block_dict[org][locus][0]
             gene_count = defaultdict(int) # i am goign to use this, to see if a locus has more than one predicted gene, and the count ratio
             gene_count[best_hit.predicted_gene()] +=1
             for hlog in hlog_list:
                 gene_count[hlog.predicted_gene()] +=1
                 if best_hit.e_val() > hlog.e_val():
                     best_hit = hlog
-            print gene_count.keys()
+            #print gene_count.keys()
             result.append(best_hit)
     handle = open(outfile, 'w')
     handle.write('\n'.join([i.ret_str() for i in result]))
     handle.close()
 
 
-def return_gene_to_operon_dict(fname):
-    operon_dict = {}
+def return_gene_to_gene_block_dict(fname):
+    gene_block_dict = {}
     for line in [i.strip().split('\t') for i in open(fname).readlines()]:
-        operon = line[0]
+        gene_block = line[0]
         for gene in line[1:]:
-            operon_dict.update({gene: operon})
-    return operon_dict
+            gene_block_dict.update({gene: gene_block})
+    return gene_block_dict
  
 def main():
     start = time.time()
     
     parsed_args = parser_code()
     
-    infolder, outfolder, gene_block_query, filter_file, num_proc = check_options(parsed_args)
+    infolder, outfolder, gene_block_query, filter_file, num_proc, quiet = check_options(parsed_args)
     
-    print infolder, outfolder, gene_block_query, filter_file, num_proc
+    if not quiet:
+        print infolder, outfolder, gene_block_query, filter_file, num_proc, quiet
     
-    # This code makes a dictionary mapping gene annotation to the operon that it belong to
-    operon_dict = return_gene_to_operon_dict(gene_block_query)
-    print "operon_dict", operon_dict
+    # This code makes a dictionary mapping gene annotation to the gene block that it belong to
+    gene_block_dict = return_gene_to_gene_block_dict(gene_block_query)
+    #print "gene_block_dict", gene_block_dict
     
-    #parallel_blast_parse_dict('./blast_parse/organism_raw_info/', './blast_parse/filtered_homologs/', num_proc, './genbank_pathway_lists/nc_filter_file.txt', operon_dict)
-    parallel_blast_parse_dict(infolder, outfolder, num_proc, filter_file, operon_dict)
+    #parallel_blast_parse_dict('./blast_parse/organism_raw_info/', './blast_parse/filtered_homologs/', num_proc, './genbank_pathway_lists/nc_filter_file.txt', gene_block_dict)
+    parallel_blast_parse_dict(infolder, outfolder, num_proc, filter_file, gene_block_dict)
     
     
-    #operon_dict = return_operon_list('./blast_parse/filtered_homologs/atpIBEFHAGDC.txt')
+    #gene_block_dict = return_gene_block_list('./blast_parse/filtered_homologs/atpIBEFHAGDC.txt')
     
-    #best_homolog_list(operon_dict, './blast_parse/processed_operon_files/atpIBEFHAGDC.txt')
+    #best_homolog_list(gene_block_dict, './blast_parse/processed_gene_block_files/atpIBEFHAGDC.txt')
     
-    print time.time() - start
+    if not quiet:
+        print time.time() - start
 
     # ./blast_parse.py -f phylo_order.txt
 if __name__ == '__main__':

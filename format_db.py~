@@ -281,7 +281,7 @@ def main():
     #print "do_protein", do_protein
     parallel_convert_genbank(file_list, outfolder, num_proc, do_protein)
 
-    if not quiet: 
+   if not quiet: 
         print time.time() - start
 
     # A successful command could look like this:
