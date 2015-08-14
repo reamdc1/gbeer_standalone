@@ -245,6 +245,9 @@ def parser_code():
     parser.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
                 help="Suppresses most program text outputs.")
                        
+    parser.add_argument("-d", "--db", dest="db_directory", metavar="DIRECTORY", default='NONE',
+                help="Directory where protein BLAST db are stored.")
+    
     return parser.parse_args()
     
     
@@ -320,9 +323,17 @@ def check_options(parsed_args):
     
     clean = parsed_args.clean
     quiet = parsed_args.quiet
+    
+    # check the genbank folder
+    if parsed_args.db_directory == 'NONE' or os.path.isdir(parsed_args.db_directory):
+        db_directory = parsed_args.db_directory
+    else:
+        print "The folder %s does not exist." % parsed_args.db_directory
+        sys.exit()
+        
 
     #return genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val
-    return genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean, quiet
+    return genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean, quiet, db_directory
 
 # This function will clean up the output of the program so that intermediate files or directories are removed.
 # The major reason that this function exists is that a large number of debugging intermediate steps exist, and 
@@ -354,11 +365,11 @@ def main():
     parsed_args = parser_code()
     
     #genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val = check_options(parsed_args)
-    genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean, quiet = check_options(parsed_args)
+    genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean, quiet, db_directory = check_options(parsed_args)
     
     #print genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val
     if not quiet:
-        print genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean, quiet
+        print genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean, quiet, db_directory
     
     
     ########################################################

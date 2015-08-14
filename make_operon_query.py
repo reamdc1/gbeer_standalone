@@ -9,7 +9,8 @@ from multiprocessing import Pool
 import time
 import os
 import sys
-import simplejson as json
+#import simplejson as json
+import json
 import argparse
 from Bio import SeqIO
 from Bio.SeqUtils import GC
