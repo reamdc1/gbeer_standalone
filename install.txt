@@ -24,6 +24,13 @@ sudo apt-get ncbi-tools-bin
 Levenshtein module for python:
 sudo apt-get install python-levenshtein
 
+matplotlib: I will have to get this bit sorted out
+sudo apt-get install python-matplotlib
+other ways to get, though i don't think they are enough for this project
+sudo apt-get install python-matplotlib
+-or-
+sudo yum install python-matplotlib
+
 git:
 sudo apt-get git
 
@@ -49,6 +56,7 @@ sudo apt-get install python-levenshtein
 sudo apt-get cd-hit
 sudo apt-get clustalw
 sudo apt-get git
+sudo apt-get install python-matplotlib
 
 install the repo:
 change directory to wherever you want to run the script from. then,
