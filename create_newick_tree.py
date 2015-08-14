@@ -326,7 +326,7 @@ def main():
     
     # Execute code fork that builds a tree from scratch
     if tree_file == 'NONE':
-        print "got here"
+        #print "got here"
         # set the distmat file that is created in "make_target_fasta()" for i have no idea why
         marker_fasta = tmp_directory + "distmat_marker.fa"
         common_to_accession_dict = make_target_fasta(marker_gene, genbank_directory, filter_file, marker_fasta)
@@ -340,7 +340,7 @@ def main():
     
         #shutil.copy(tree_file, outfile)
     else:
-        print "Got here 2"
+        #print "Got here 2"
         common_to_accession_dict = make_common_to_accession_dict(genbank_directory, filter_file)
         return_tree_order_list_2(tree_file, common_to_accession_dict, accession_to_common_outfile, phylo_order_new_outfile)
     #return_tree_order_list(outfile, common_to_accession_dict)

@@ -15,8 +15,11 @@ import argparse
 import pickleToCSV
 import csv
 import uuid
+import time
 from homolog4 import *
 
+# TODO: parallelize this code, it takes forever to execute and single threaded on an
+# embarrassingly parallel problem
 
 ## Traverses the genome information directory
 def traverseAll(path):
@@ -332,10 +335,16 @@ def makeSubfolder(output_directory_path, subfolder_name, sessionID):
     os.makedirs(path)
     return path
 
+def makeSubfolder2(output_directory_path, subfolder_name):
+    path = output_directory_path + "/" + subfolder_name
+    os.makedirs(path)
+    return path
+
+
 def chk_output_directory_path(OutputDirectory,sessionID):
     if not os.path.exists(OutputDirectory + "_" + str(sessionID)):
         try:
-           os.mkdir(OutputDirectory + "_" + str(sessionID))
+           #os.mkdir(OutputDirectory + "_" + str(sessionID))
            return True
         except OSError:
            print "Unable to create directory:", OutputDirectory
@@ -354,23 +363,33 @@ def get_arguments():
     return args
 
 if __name__ == "__main__":
+
+    start = time.time()
+
     all_colors = list(reportlab.lib.colors.getAllNamedColors().items())
     args = get_arguments()
     sessionID = uuid.uuid1()
     condition = chk_output_directory_path(args.OutputDirectory,sessionID)
     if condition:
-       outputsession = args.OutputDirectory + "_" + str(sessionID)        
+       outputsession = args.OutputDirectory # + "_" + str(sessionID)    
+       '''    
        OutputGenomeDiagDirectory = makeSubfolder(outputsession,"genome-diagrams",sessionID)
        OutputCSVDirectory = makeSubfolder(outputsession,"operon-event-matrices",sessionID)
        OutputTreeGDHeatDirectory = makeSubfolder(outputsession,"tree-gd-heat-diagrams",sessionID)
        TempDirectory = makeSubfolder(outputsession, "temporary-files",sessionID)
+       '''
+       OutputGenomeDiagDirectory = makeSubfolder2(outputsession,"genome-diagrams")
+       OutputCSVDirectory = makeSubfolder2(outputsession,"operon-event-matrices")
+       OutputTreeGDHeatDirectory = makeSubfolder2(outputsession,"tree-gd-heat-diagrams")
+       TempDirectory = makeSubfolder2(outputsession, "temporary-files")
+       
        accession_order,organism_order = reading_MappingFile(args.MappingFile)
        res = traverseAll(args.OperonDataDirectory)
        split_distance = args.splitDistance
        legendData = {}
-       print "*****"
+       #print "*****"
        print "Results can be found in the following directory:", outputsession
-       print "*****"
+       #print "*****"
        for r in res:
            root,f = os.path.split(r)
            ##listLines = reading_optFile(r)
@@ -383,3 +402,6 @@ if __name__ == "__main__":
            operonName =  ntpath.basename(r)
            legendData[operonName.split(".")[0]] = idToColorDict_matplotlib
        pickleToCSV.generateCombined(args.EventsDict,legendData,accession_order,organism_order,args.NewickTree,OutputCSVDirectory,OutputGenomeDiagDirectory,OutputTreeGDHeatDirectory,TempDirectory)   
+       
+       
+    print time.time() - start

@@ -9,8 +9,12 @@ begins at though this could become a feaure later.
 
 
 gbeer_standalone.py -h
+usage: gbeer_standalone.py [-h] [-i FILE] [-G DIRECTORY] [-o DIRECTORY]
+                           [-f FILE] [-n INT] [-m INT] [-g INT] [-e FLOAT]
+                           [-t FILE] [-c] [-q]
+
 The purpose of this script is to run the full software suite that we have
-developed to study operons using as few inputs as possible. This will
+developed to study gene blocks using as few inputs as possible. This will
 facilitate the ease of use as much as possible.
 
 optional arguments:
@@ -31,7 +35,7 @@ optional arguments:
                         Number of processors that you want this script to run
                         on. The default is every CPU that the system has.
   -m INT, --min_genes INT
-                        Minum number of genes that an operon must contain
+                        Minum number of genes that an gene_block must contain
                         before it can be considered for further analysis. The
                         default is 5 because that is what we are currently
                         using in the study.
@@ -46,8 +50,6 @@ optional arguments:
   -c, --clean           Flag to toggle the removal of intermediate files that
                         are unnecessary for analysis, reducing the storage
                         requirements for a run.
+  -q, --quiet           Suppresses most program text outputs.
 
-=======
-# gbeer_standalone
-This is a project based on my earlier gene_block_evolution project.
 >>>>>>> f3a44d21adccfd356de425f0cd080b351378175d

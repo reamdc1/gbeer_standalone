@@ -93,10 +93,14 @@ def producePhylo(fig,gridspace1,tree_path):
     ##rect_phyl = [-0.7, 0.3, 0.3, 0.8]
     phyl_ax=fig.add_subplot(gridspace1)
     ##phyl_ax = plt.axes(rect_phyl,frameon=True)
+    
+    # This is where i think that we are getting all that rectangle nonsense
+    '''
     phyl_ax.add_patch(Rectangle((5.6,16.7),10.2,16.8,edgecolor="brown", fill=False))
     phyl_ax.add_patch(Rectangle((5.6,9.5),10.2,6.8,edgecolor="magenta", fill=False))
     phyl_ax.add_patch(Rectangle((5.6,6.6),10.2,2.6,edgecolor="black", fill=False))
     phyl_ax.add_patch(Rectangle((5.6,0.4),10.2,5.9,edgecolor="turquoise", fill=False))
+    '''
     Phylo.draw(tree, axes=phyl_ax, do_show=False,show_confidence=False)
     phyl_ax.set_xlim(0,16)
     phyl_ax.set(xlabel='',ylabel='')

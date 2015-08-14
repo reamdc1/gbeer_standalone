@@ -56,4 +56,6 @@ pip-delete-this-directory.txt
 *.swp
 *.swo
 
-
+# This project specific
+####################
+error_log.txt
