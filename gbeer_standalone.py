@@ -583,7 +583,7 @@ def main():
     
     # The resulting directory contains only one file, and it is not the most useful file for a user. it is small though, so i'm leaning toward keeping.
     
-    '''
+    
     # Step 9: Run the visualization pipelilne using the pairwaise event matrix that is calculated in step 7
     
     project_visualization_outfolder = outfolder + visualization_outfolder
@@ -609,7 +609,7 @@ def main():
     if not quiet:
         print "cmd9", cmd9
     os.system(cmd9)
-    '''
+    
     #print "results_to_move", results_to_move, "results_to_remove", results_to_remove
     if clean:
         cleanup_function(results_to_move, results_to_remove, outfolder)
