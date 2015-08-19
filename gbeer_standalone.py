@@ -439,8 +439,25 @@ def main():
     ########################################################
     
     #Step 3: Create BLAST searchable databases. (I am limiting this to protein databases right now since that is what we do in the paper)
-    project_BLAST_database_folder = outfolder + BLAST_database_folder
+    if db_directory == 'NONE':
+        project_BLAST_database_folder = outfolder + BLAST_database_folder
+        # BLAST databases are not necessary to keep, unless provided.  This was created for the specifice run, and should be deleted since the databases are large
+        results_to_remove.append(project_BLAST_database_folder)
+        cmd3 = "./format_db.py --filter %s --genbank_directory %s --outfolder %s --num_proc %i" % (filter_file, genbank_directory, project_BLAST_database_folder,  num_proc)
     
+        # Set the database formatting option[Protein or DNA], even though we don't use it (yet).  verified working 7/22/2015
+        if BLAST_format_protein == 'True':
+            pass
+        else:
+            cmd3 = cmd3 + ' -d'
+        if quiet:
+            cmd3 = cmd3 + " --quiet"
+        else:
+            print "cmd3", cmd3
+        os.system(cmd3)
+    else:
+        project_BLAST_database_folder = db_directory
+    '''
     # BLAST databases are not necessary to keep, unless I add an option to explicitly provide them.  This should be deleted, as the databases are large
     # TODO: if the databases are an option the user can provide, add logic to choose deletion for only programatically created databases
     # Do this step when the project_BLAST_database_folderis set immediately above.
@@ -458,7 +475,7 @@ def main():
     else:
         print "cmd3", cmd3
     os.system(cmd3)
-    
+    '''
     # BLAST databases are not necessary to keep, unless I add an option to explicitly provide them.  This should be deleted, as the databases are large
     #results_to_remove.append(project_BLAST_database_folder)
     
@@ -566,7 +583,7 @@ def main():
     
     # The resulting directory contains only one file, and it is not the most useful file for a user. it is small though, so i'm leaning toward keeping.
     
-    
+    '''
     # Step 9: Run the visualization pipelilne using the pairwaise event matrix that is calculated in step 7
     
     project_visualization_outfolder = outfolder + visualization_outfolder
@@ -592,7 +609,7 @@ def main():
     if not quiet:
         print "cmd9", cmd9
     os.system(cmd9)
-    
+    '''
     #print "results_to_move", results_to_move, "results_to_remove", results_to_remove
     if clean:
         cleanup_function(results_to_move, results_to_remove, outfolder)
