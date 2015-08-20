@@ -1,11 +1,11 @@
-gbeer_standalone
+GBEER_standalone
 ==========
 
 Overview
 --------
 
-gbeer_standalone is a tool to quantify and visualize the evolutionary changes that occur in gene blocks.
-gbeer_standalone is designed to be run from the command line, or as part of a web installation, and has tools
+GBEER_standalone is a tool to quantify and visualize the evolutionary changes that occur in gene blocks.
+GBEER_standalone is designed to be run from the command line, or as part of a web installation, and has tools
 and options designed to accomodate these two roles. 
 
 Released under GPL version 3 licence. See http://www.gnu.org/licenses/lgpl.html or
@@ -24,23 +24,51 @@ To be tested as requirements
 * BLAST+ (ncbi-blast+) - this might not be necessary, i am going to check this dependency explicitly soon
 * CD-hit (cd-hit) - not required yet, but will be soon
 
-
+To install these requirements in a single line, copy the following to a command line window:
 ```bash
 apt-get install python-biopython python-matplotlib python-levenshtein clustalw ncbi-tools-bin blast2 ncbi-blast+ cd-hit
 ```
 
+Downloading GBEER_standalone
+----------------------
+
+GBEER_standalone is stored in a git repository, therefore you should install Git in order
+to more easily update this software in the future, and continue folowing this guide.
+
+To install these requirements in a single line, copy the following to a command line window:
+```bash
+apt-get install git
+```
+
+Once this is installed you can download the latest version of the project using the command
+
+```bash
+git clone https://github.com/reamdc1/gbeer_standalone.git
+```
+
+To update the software package you need to change to the directory that you stored the 
+GBEER_standalone application can run the following command.  Git will check for updates
+and make any changes needed to keep the software up-to-date.
+
+```bash
+git pull
+```
+
+Running GBEER_standalone
+-------------------------
 
 The easiest way to run the project is to execute the script named 'gbeer_standalone.py'.  The defaults
-that are provided are sufficient to run the project with the inputs provided.
-Each accompanying script can be run on its own as well.  gbeer_standalone.py does not allow for the intermediate
-files or folders to be renamed by the user.  Currently the user cannot select the point that analysis
-begins at though this could become a feaure later.
+that are provided are sufficient to run the project with the data provided.  The results will be placed into a 
+directory called './test_run/'
+
+Each accompanying script can be run on its own as well, and each help for each script can be found by
+using the -h or --help option.
 
 
 gbeer_standalone.py -h
 usage: gbeer_standalone.py [-h] [-i FILE] [-G DIRECTORY] [-o DIRECTORY]
                            [-f FILE] [-n INT] [-m INT] [-g INT] [-e FLOAT]
-                           [-t FILE] [-c] [-q]
+                           [-t FILE] [-c] [-q] [-d DIRECTORY]
 
 The purpose of this script is to run the full software suite that we have
 developed to study gene blocks using as few inputs as possible. This will
@@ -80,5 +108,5 @@ optional arguments:
                         are unnecessary for analysis, reducing the storage
                         requirements for a run.
   -q, --quiet           Suppresses most program text outputs.
-
->>>>>>> f3a44d21adccfd356de425f0cd080b351378175d
+  -d DIRECTORY, --db DIRECTORY
+                        Directory where protein BLAST db are stored.
