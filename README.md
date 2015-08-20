@@ -1,5 +1,34 @@
-<<<<<<< HEAD
-In this document I will explain how to use the software contained in this project. 
+gbeer_standalone
+==========
+
+Overview
+--------
+
+gbeer_standalone is a tool to quantify and visualize the evolutionary changes that occur in gene blocks.
+gbeer_standalone is designed to be run from the command line, or as part of a web installation, and has tools
+and options designed to accomodate these two roles. 
+
+Released under GPL version 3 licence. See http://www.gnu.org/licenses/lgpl.html or
+LICENSE for more details.
+
+Requirements
+------------
+* Python 2.7.6+
+* Biopython 1.63+ (python-biopython)
+* matplotlib 1.4.3+ (python-matplotlib)
+* Levenshtein (python-levenshtein)
+* ClustalW (clustalw) - likely replaced with ClustalOmega (clustalo)
+* ncbi-tools (ncbi-tools-bin)
+* BLAST2 (blast2)
+To be tested as requirements
+* BLAST+ (ncbi-blast+) - this might not be necessary, i am going to check this dependency explicitly soon
+* CD-hit (cd-hit) - not required yet, but will be soon
+
+
+```bash
+apt-get install python-biopython python-matplotlib python-levenshtein clustalw ncbi-tools-bin blast2 ncbi-blast+ cd-hit
+```
+
 
 The easiest way to run the project is to execute the script named 'gbeer_standalone.py'.  The defaults
 that are provided are sufficient to run the project with the inputs provided.
