@@ -61,14 +61,16 @@ With the project we have included a small dataset from proteobacteria. If you ar
 interested in using a larger dataset, individual organism genbank files can be found at 
 ftp://ftp.ncbi.nih.gov/genomes/Bacteria/
 
-Additionally, if you wish to download every fully sequenced bacterial genome it can be downloaded with 
-a browser from the following address
-ftp://ftp.ncbi.nih.gov/genomes/Bacteria/all.gbk.tar.gz - This file is 7.6 GB as of August, 2015
-
-you can also download the file using the command.  just make sure that you are in the directory you want to store it.
+Additionally, if you wish to download every fully sequenced bacterial genome you can use the following command.
+Just make sure that you are in the directory you want to store it.
 ```bash
 wget ftp://ftp.ncbi.nih.gov/genomes/Bacteria/all.gbk.tar.gz
 ```
+
+Additionally it can be downloaded using a browser from the following address.
+ftp://ftp.ncbi.nih.gov/genomes/Bacteria/all.gbk.tar.gz - This file is 7.6 GB as of August, 2015
+
+
 
 Running GBEER_standalone
 -------------------------
