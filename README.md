@@ -37,7 +37,7 @@ to more easily update this software in the future, and continue folowing this gu
 
 To install these requirements in a single line, copy the following to a command line window:
 ```bash
-apt-get install git
+sudo apt-get install git
 ```
 
 Once this is installed you can download the latest version of the project using the command
@@ -53,6 +53,19 @@ and make any changes needed to keep the software up-to-date.
 ```bash
 git pull
 ```
+
+ Downloading additional data
+----------------------------
+
+With the project we have included a small dataset from proteobacteria. If you are
+interested in using a larger dataset, individual organism genbank files can be found at 
+ftp://ftp.ncbi.nih.gov/genomes/Bacteria/
+
+Additionally, if you wish to download every fully sequenced bacterial genome it can be downloaded at
+ftp://ftp.ncbi.nih.gov/genomes/Bacteria/all.gbk.tar.gz - This file is 7.6 GB as of August, 2015
+
+you can also download the file 
+
 
 Running GBEER_standalone
 -------------------------
