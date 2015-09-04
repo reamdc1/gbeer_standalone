@@ -395,7 +395,7 @@ def make_gene_block_fasta2(gene_list, genbank_list, num_processors, outfile, ref
     return ref_prot_outfile, ref_rna_outfile, organism_dict_for_recovery
     '''
 
-# This function validates the gene_blocks in the references. any gene_blocks which canot be located in their entirety are omitted
+# This function validates the gene_blocks in the references. any gene_blocks which cannot be located in their entirety are omitted
 # it returns two dicts.  one has just the gene_blocks and a list of their genes, the other has gene_blocks, list of genes with the
 # type of product produced
 def categorize_gene_blocks(ref_org, genbank_list, gene_block_dict):
