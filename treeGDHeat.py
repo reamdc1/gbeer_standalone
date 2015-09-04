@@ -193,10 +193,11 @@ def combineAll(max_num, min_num, full_len, txtnames, tree_path, operon, gd_files
     ##heatmapGS = gridspec.GridSpec(2,2,wspace=0.0,hspace=0.0,width_ratios=[0.40,1],height_ratios=[1,1])
     phyl_ax = producePhylo(fig,heatmapGS[0,0],tree_path)
     for gd in gd_files_list:
-        if ntpath.basename(gd.split(".")[0]) == operon.split("_")[0]:
-           geneToColorDict=pickleDict[ntpath.basename(gd.split(".")[0])]
+        if ntpath.basename(gd).split(".")[0] == operon.split("_")[0]:
+           geneToColorDict=pickleDict[ntpath.basename(gd).split(".")[0]]
            gd_ax = imshowGD(fig,heatmapGS[0,1],gd)
            legend_ax = legendDrawing(fig,heatmapGS[1,1],geneToColorDict,gd,operon)
+           print "in the if";
            break
    
     ht_ax = produceHeat(fig,heatmapGS[0,2], max_num, min_num, full_len, txtnames)
