@@ -216,17 +216,17 @@ def parser_code():
     parser.add_argument("-G", "--genbank_directory", dest="genbank_directory", metavar="DIRECTORY", default='./genomes/',
                 help="Folder containing all genbank files for use by the program.")
                  
-    parser.add_argument("-o", "--outfolder", dest="outfolder", metavar="DIRECTORY", default='./test_run/',
+    parser.add_argument("-o", "--outfolder", dest="outfolder", metavar="DIRECTORY", default='./test_run_test/',
                 help="Folder where results will be stored.")
     
     parser.add_argument("-f", "--filter", dest="filter", metavar="FILE", default='./phylo_order.txt',
-                help="File restrictiong which accession numbers this script will process. If no file is provided, filtering is not performed.")
+                help="File restricting which accession numbers this script will process. If no file is provided, filtering is not performed.")
                 
     parser.add_argument("-n", "--num_proc", dest="num_proc", metavar="INT", default = os.sysconf("SC_NPROCESSORS_CONF"), type=int,
                 help="Number of processors that you want this script to run on. The default is every CPU that the system has.")
 
     parser.add_argument("-m", "--min_genes", dest="min_genes", metavar="INT", default = 5, type=int,
-                help="Minum number of genes that an gene_block must contain before it can be considered for further analysis. The default is 5 because that is what we are currently using in the study.")
+                help="Minimum number of genes that a gene_block must contain before it can be considered for further analysis. The default is 5 because that is what we are currently using in the study.")
     
     parser.add_argument("-g", "--max_gap", dest="max_gap", metavar="INT", default = 500, type=int,
                 help="Size in nucleotides of the maximum gap allowed between genes to be considered neighboring. The default is 500.")
@@ -380,7 +380,7 @@ def main():
     # Step 1: Create a phylogenetic tree from the organisms in the either the whole set provided in the genome directory, 
     # or from the organisms that are included in the organism filter file.  
     #TODO: 
-    # 1) Make it possibel to choose a protein or RNA gene, currently only protein genes are accepted.
+    # 1) Make it possible to choose a protein or RNA gene, currently only protein genes are accepted.
     # 2) Allow users to provide their own phylogenetic tree, and have the program use it, producing an accession list from the data if the tree lables are of a certain format
     #       2.1) options have been added to allow this.  the script needs to accomodate this option at this point.
     project_tree_outfolder = outfolder + tree_outfolder.lstrip("./")
@@ -423,15 +423,15 @@ def main():
     	    print "cmd2", cmd2
     	os.system(cmd2)
     	gene_block_file = outfolder + regulon_default_gene_block_file
-    	
+        
+        #The gene block file is useful to anyone doing further analysis, so I have chosen to keep this ile, the rest of the files that are created can be removed
+        results_to_move.append(gene_block_file)
+        # The directory that is created (project_regulon_outfolder) can have its contents removed, as no other files are currently useful
+        results_to_remove.append(project_regulon_outfolder)
+    	gene_block_file = project_regulon_outfolder + 'gene_block_names_and_genes.txt'
     else: # do not run the regulon script, use the user-supplied file instead
         pass
     #print "gene_block_file", gene_block_file
-    
-    #The gene block file is useful to anyone doing further analysis, so I have chosen to keep this ile, the rest of the files that are created can be removed
-    results_to_move.append(gene_block_file)
-    # The directory that is created (project_regulon_outfolder) can have its contents removed, as no other files are currently useful
-    results_to_remove.append(project_regulon_outfolder)
     
     ########################################################
     # Step 3 fully checked and operational as of 7/23/2015 #
@@ -486,7 +486,7 @@ def main():
     
     # TODO:  fix the rest of the operon references in this script, there are only a few that are left.
     #Step 4: make the operon query fasta file(s)
-    gene_block_file = project_regulon_outfolder + 'gene_block_names_and_genes.txt'
+    #gene_block_file = project_regulon_outfolder + 'gene_block_names_and_genes.txt'
     
     #This is the only outfile for this stage.  I don't think this needs its own seperate output directory, since this file is potentialy useful
     # to a user after the program is run.
@@ -612,7 +612,8 @@ def main():
     
     #print "results_to_move", results_to_move, "results_to_remove", results_to_remove
     if clean:
-        cleanup_function(results_to_move, results_to_remove, outfolder)
+        #cleanup_function(results_to_move, results_to_remove, outfolder)
+        print "Clean function Commented";
         
         
     if not quiet:
