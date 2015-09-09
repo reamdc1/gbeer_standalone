@@ -394,14 +394,14 @@ if __name__ == "__main__":
            root,f = os.path.split(r)
            ##listLines = reading_optFile(r)
            ##result_dict = listToDict(listLines)
-           print f;
+           #print f;
            result_dict = gdVisualizationDict(r)
            changedStrandedness = handle_strandedness(result_dict)
            idToColorDict_matplotlib = drawGenomeDiag(changedStrandedness,accession_order,split_distance,f,OutputGenomeDiagDirectory)
            ##print "legend_data",ntpath.basename((r.split("/")[4]).split(".")[0])
            
            operonName =  ntpath.basename(r)
-           print operonName;
+           #print operonName;
            legendData[operonName.split(".")[0]] = idToColorDict_matplotlib
        pickleToCSV.generateCombined(args.EventsDict,legendData,accession_order,organism_order,args.NewickTree,OutputCSVDirectory,OutputGenomeDiagDirectory,OutputTreeGDHeatDirectory,TempDirectory)   
        
