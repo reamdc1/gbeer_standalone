@@ -75,7 +75,9 @@ def produceHeat(fig,gridspace3,max_num, min_num, full_len, txtnames):
     ht_ax.yaxis.set_major_locator(majorLocator)
     ht_ax.xaxis.set_minor_locator(minorLocator)
     ht_ax.grid(True, which='major')
-    ht_ax.set_xticklabels(txtnames, minor=True,rotation=90)
+    ##Added this code to reverse the labels of the heat map.
+    ##The distance matrix from which the heatmap is generated consists of the distance of the pairs of species in the same order so reversing the list to show the correct labels.  
+    ht_ax.set_xticklabels(list(reversed(txtnames)), minor=True,rotation=90)
     plt.setp(ht_ax.get_xmajorticklabels(),visible=False)
     plt.setp(ht_ax.get_yticklabels(),visible=False)    
     plt.setp(ht_ax.get_xticklines(),visible=False)
@@ -197,7 +199,7 @@ def combineAll(max_num, min_num, full_len, txtnames, tree_path, operon, gd_files
            geneToColorDict=pickleDict[ntpath.basename(gd).split(".")[0]]
            gd_ax = imshowGD(fig,heatmapGS[0,1],gd)
            legend_ax = legendDrawing(fig,heatmapGS[1,1],geneToColorDict,gd,operon)
-           print "in the if";
+           #print "in the if";
            break
    
     ht_ax = produceHeat(fig,heatmapGS[0,2], max_num, min_num, full_len, txtnames)
