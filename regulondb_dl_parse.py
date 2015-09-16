@@ -268,7 +268,7 @@ def parse_regulonDB_file_and_store_results(outfolder, min_genes, url, download, 
 
     gene_dict = {}
     
-    # open the file that contains the pathways to each of the refrence genomes (since this is regulonDB, both varients of E. coli apply
+    # open the file that contains the pathways to each of the reference genomes (since this is regulonDB, both variants of E. coli apply
     for gene_block_line in [i.strip().split('\t') for i in open(unfiltered_regulong_parsed_file).readlines()]:
         gene_block_name = gene_block_line[0]
         gene_dict.update({gene_block_name:{}})
@@ -284,7 +284,7 @@ def parse_regulonDB_file_and_store_results(outfolder, min_genes, url, download, 
 
     # there are two classes of potential products, protein and rna.  there is a list of terms that are acceptable for each
     # These two lists keep track of this, so we know what are effectively congruent terms, as we only care if they prot/rna are signaled.
-    # when we determine the typ of each gene block, which is RNA, protein, mixed.
+    # when we determine the type of each gene block, which is RNA, protein, mixed.
     rna_list = ['tRNA', 'rRNA', 'ncRNA', ]
     protein_list = ['Protein', 'Pseudo_Gene']
     
