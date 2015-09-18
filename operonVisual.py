@@ -85,7 +85,7 @@ def gdVisualizationDict(infile):
 def allReverseStranded(strand_list):
     condition = all(x == strand_list[0] for x in strand_list)
     if condition == True:
-       if strand_list[0] == str(-1):
+       if strand_list[0] == str(-1) or strand_list[0] == -1:
            condition = True
        else:
            condition = False
@@ -129,7 +129,7 @@ def findMajority(geneStartStopStrandDirection , acc):
             maxLen = len(subList)
             maxList = subList        
     strand = maxList[0][3]
-    if strand == '-1':
+    if strand == '-1' or strand == -1:
         strandedness = 'negative'
     else:
         strandedness = 'positive'
@@ -140,7 +140,7 @@ def findEqual(geneStartStopStrandDirection):
         positiveNum = 0
         negativeNum = 0
         for tup in geneStartStopStrandDirection:
-            if tup[3] == '-1':
+            if tup[3] == '-1' or tup[3] == -1:
                 negativeNum+=1
             else:
                 positiveNum+=1
@@ -198,7 +198,8 @@ def handle_strandedness(parsed_Dict):
                                  reversedMajorityList.append(new_ele)
                           else:
                              for ele in reversed(l):
-                                 if ele[3] == '1':
+                                 strandDirection = ele[3]
+                                 if strandDirection == str(1) or strandDirection == '+1' or strandDirection == 1:
                                     direction = '-1'
                                  else:
                                     direction = '+1'
@@ -255,6 +256,34 @@ def drawGenomeDiag(result_Dict,phylo_order,split_distance,filename,OutputDirecto
            minPosList = []
            tmp_list = result_Dict[rec]
            maxStrandList = []
+           ##Code for changing the strand
+           '''forw_count = 0
+           revs_count = 0
+           revrs_flag = False
+           for l in tmp_list:
+               strandDirection=l[3]
+               if strandDirection == str(1) or strandDirection == '+1' or strandDirection == 1:
+                   forw_count = forw_count + 1
+               else:
+                   revs_count = revs_count + 1
+           tmp_list1 = []
+           if(forw_count < revs_count):
+               for l in reversed(tmp_list):
+                   strandDirection=l[3]
+                   temp = []
+                   temp.append(l[0])
+                   temp.append(l[1])
+                   temp.append(l[2])
+                   if strandDirection == str(1) or strandDirection == '+1' or strandDirection == 1:
+                       temp.append('-1')
+                   elif strandDirection == str(-1) or strandDirection == -1:
+                       temp.append('+1')
+                   else:
+                       temp.append(l[3])
+                   tmp_list1.append(temp)
+           else:
+               tmp_list1 = tmp_list'''
+               
            for l in tmp_list:
                geneName=l[0]
                startPos=int(l[1])
