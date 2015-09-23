@@ -104,6 +104,10 @@ def producePhylo(fig,gridspace1,tree_path):
     phyl_ax.add_patch(Rectangle((5.6,0.4),10.2,5.9,edgecolor="turquoise", fill=False))
     '''
     Phylo.draw(tree, axes=phyl_ax, do_show=False,show_confidence=False)
+    #Phylo.draw_graphviz(tree, phyl_ax, )
+    #print os.path.join(joined_path,operon+"phylo.png");
+    #target1 = open.write(operon+"phylo.png",'w');
+    #Phylo.draw_ascii(tree,target1)
     phyl_ax.set_xlim(0,16)
     phyl_ax.set(xlabel='',ylabel='')
     plt.setp(phyl_ax.get_xticklabels(),visible=False)

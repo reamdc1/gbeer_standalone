@@ -19,13 +19,14 @@ from Bio.Application import _Option
 from Bio.Align.Applications import ClustalwCommandline
 from Bio import Phylo
 import subprocess
+import Configuration_Variables as conf_var
 
 # Globals
 # The three output file names will be stored in the output directory that is supplied by the user
-newick_tree = 'out_tree.nwk'
+#newick_tree = 'out_tree.nwk'
 #outfile_for_asma = 'accession_to_common.txt'
-accession_to_common = 'accession_to_common.csv'
-phylo_order_new = 'phylo_order_new.txt'
+#accession_to_common = 'accession_to_common.csv'
+#phylo_order_new = 'phylo_order_new.txt'
 
 # This exists to  make the main function easier to read. It contains code to run the argument parser, and does nothing else.
 def parser_code():
@@ -103,7 +104,7 @@ def return_recursive_dir_files(root_dir):
     return result
 
 def return_file_list(infolder, filter_file):
-    if filter_file == '':
+    if filter_file == '' or filter_file == 'NONE':
         return return_recursive_dir_files(infolder)   
     else:
         filter_list = [i.strip() for i in open(filter_file)]
@@ -206,7 +207,7 @@ def make_target_fasta(marker, infolder, filter_file, marker_fasta):
     #return "./msa_tmp/distmat_marker.ph", common_to_accession_dict
     return common_to_accession_dict
 
-
+##Not Used in the main Code
 def return_tree_order_list(newick_tree_file, common_to_accession_dict):
     result = []
     tree = Phylo.read("out_tree.nwk", "newick")
@@ -320,9 +321,9 @@ def main():
         print genbank_directory, outfolder, filter_file, marker_gene
     
     # set the paths for the three output files
-    newick_tree_outfile = outfolder + newick_tree
-    accession_to_common_outfile = outfolder + accession_to_common # formally: outfile_for_asma
-    phylo_order_new_outfile = outfolder + phylo_order_new
+    newick_tree_outfile = outfolder + conf_var.newick_tree
+    accession_to_common_outfile = outfolder + conf_var.accession_to_common # formally: outfile_for_asma
+    phylo_order_new_outfile = outfolder + conf_var.phylo_order_new
     
     # Execute code fork that builds a tree from scratch
     if tree_file == 'NONE':

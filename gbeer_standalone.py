@@ -5,6 +5,10 @@ import os
 import sys
 import argparse
 import shutil
+from ast import parse
+from config import Config
+import Configuration_Variables as conf_var
+from turtle import config_dict
 
 # Copyright(C) 2015 David Ream
 # Released under GPL version 3 licence. http://www.gnu.org/licenses/lgpl.html
@@ -33,12 +37,12 @@ import shutil
 # NOTE: If a gene block file is supplied, this stage will be skipped. I currently do not perform a validity check on this input. 
 
 # These options will not be alterable in the command line of this script, but have values that may be useful to control.
-regulon_url = 'http://regulondb.ccg.unam.mx/menu/download/datasets/files/OperonSet.txt'
-regulon_outfolder = 'regulonDB/'
-regulon_default_gene_block_file = regulon_outfolder + 'gene_block_names_and_genes.txt'
+#regulon_url = 'http://regulondb.ccg.unam.mx/menu/download/datasets/files/OperonSet.txt'
+#regulon_outfolder = 'regulonDB/'
+#regulon_default_gene_block_file = regulon_outfolder + 'gene_block_names_and_genes.txt'
 
 # TODO: add this option as a command line arg for the gbeer standalone script
-regulon_experimental_only = True
+#regulon_experimental_only = True
 
 # What follows is a list of options that are controlled by user inputs to this script
 # --infolder
@@ -65,14 +69,14 @@ regulon_experimental_only = True
 # Tree creation has to have a better method available...  i need to search papers.
 # 2) add command line arg to allow a user to supply their own marker gene.
 # 2.5) When we add this option we need to make it possible to determine protein/RNA product, and then handle tree creation accordingly.
-tree_marker_gene = "rpob"
+#tree_marker_gene = "rpob"
 
 # What follows is a list of options that are controlled by user inputs to this script
 # --genbank_directory
 # --filter
 
 # This option will not be alterable in the command line of this script, but may be useful to control.
-tree_outfolder = "tree/"
+#tree_outfolder = "tree/"
 
 #############################################################################################################
 # format_db.py:                                                                                             #
@@ -92,8 +96,8 @@ tree_outfolder = "tree/"
 # though currently this is not supported.
 
 # These options will not be alterable in the command line of this script, but may be useful to control.
-BLAST_database_folder = 'db/'
-BLAST_format_protein = 'True'
+#BLAST_database_folder = 'db/'
+#BLAST_format_protein = 'True'
 
 
 #############################################################################################################
@@ -111,9 +115,10 @@ BLAST_format_protein = 'True'
 # --gene_block_file
 
 # not controlled by user inputs, but will be passed as a value to make_operon_query.py as a command line param for this script
-gene_block_query_outfile = 'gene_block_query.fa' # --outfile
+#gene_block_query_outfile = 'gene_block_query.fa' # --outfile
 # will possibly deprecate the next option in the future, in leu of an alternative approach
-refrence_organism = 'NC_000913' # --refrence
+#refrence_organism = 'NC_000913' # --reference
+#refrence_organism = 'NC_000964'
 
 #############################################################################################################
 # blast_script.py:                                                                                          #
@@ -126,11 +131,11 @@ refrence_organism = 'NC_000913' # --refrence
 # --query
 # --eval
 
-# Controlled by the output from a pervious step
+# Controlled by the output from a previous step
 # --database_folder
 
 # not controlled by user inputs, but will be passed as a value to blast_script.py so the project folder is used.
-BLAST_outfolder = 'blast_result/' # will be passed to --outfolder
+#BLAST_outfolder = 'blast_result/' # will be passed to --outfolder
 
 
 #############################################################################################################
@@ -146,7 +151,7 @@ BLAST_outfolder = 'blast_result/' # will be passed to --outfolder
 # --gene_block_query    (from make_operon_query.py)
 
 # not controlled by user inputs, but will be passed as a value to blast_script.py so the project folder is used.
-BLAST_parse_outfolder = 'blast_parse/'# will be passed to --outfolder
+#BLAST_parse_outfolder = 'blast_parse/'# will be passed to --outfolder
 
 # not controlled by user inputs, no input is appropriate.  filter is for gene blocks that have been previously blasted, this option is to be run as a standalone option only.
 # --filter
@@ -164,7 +169,7 @@ BLAST_parse_outfolder = 'blast_parse/'# will be passed to --outfolder
 # --max_gap
 
 # not controlled by user inputs, but will be passed as a value to blast_script.py so the project folder is used.
-filter_BLAST_parse_outfolder = 'optimized_gene_blocks/'# will be passed to --outfolder 
+#filter_BLAST_parse_outfolder = 'optimized_gene_blocks/'# will be passed to --outfolder 
 
 # not controlled by user inputs, no input is appropriate.  filter is for gene blocks that have been previously blasted, this option is to be run as a standalone option only.
 # --filter
@@ -184,7 +189,7 @@ filter_BLAST_parse_outfolder = 'optimized_gene_blocks/'# will be passed to --out
 # --infolder
 
 # not controlled by user inputs, but will be passed as a value to blast_script.py so the project folder is used.
-event_distance_outfolder = 'gene_block_distance_matrices/'# will be passed to --outfolder 
+#event_distance_outfolder = 'gene_block_distance_matrices/'# will be passed to --outfolder 
 
 # not controlled by user inputs, no input is appropriate.  filter is for gene blocks that have been previously blasted, this option is to be run as a standalone option only.
 # --operon_filter
@@ -195,7 +200,7 @@ event_distance_outfolder = 'gene_block_distance_matrices/'# will be passed to --
 #############################################################################################################
 
 # I will add a more detailed description of what this does, and requires once i figure it out myself.
-visualization_outfolder = "visualization/"
+#visualization_outfolder = "visualization/"
 
 # This exists to  make the main function easier to read. It contains code to run the argument parser, and does nothing else.
 def parser_code():
@@ -216,10 +221,10 @@ def parser_code():
     parser.add_argument("-G", "--genbank_directory", dest="genbank_directory", metavar="DIRECTORY", default='./genomes/',
                 help="Folder containing all genbank files for use by the program.")
                  
-    parser.add_argument("-o", "--outfolder", dest="outfolder", metavar="DIRECTORY", default='./test_run_test/',
+    parser.add_argument("-o", "--outfolder", dest="outfolder", metavar="DIRECTORY", default='./test_run/',
                 help="Folder where results will be stored.")
     
-    parser.add_argument("-f", "--filter", dest="filter", metavar="FILE", default='./phylo_order.txt',
+    parser.add_argument("-f", "--filter", dest="filter", metavar="FILE", default='NONE',
                 help="File restricting which accession numbers this script will process. If no file is provided, filtering is not performed.")
                 
     parser.add_argument("-n", "--num_proc", dest="num_proc", metavar="INT", default = os.sysconf("SC_NPROCESSORS_CONF"), type=int,
@@ -247,6 +252,10 @@ def parser_code():
                        
     parser.add_argument("-d", "--db", dest="db_directory", metavar="DIRECTORY", default='NONE',
                 help="Directory where protein BLAST db are stored.")
+    
+    #parser.add_argument("-r", "--refrence_organism", dest="refrence_organism", default='NC_000913',help="Genbank Id of the Reference Organism. Default is NC_000913 for E.Coli")
+    parser.add_argument("-C", "--configuration", dest="configuration_file",metavar="CONFIGURATION FILE", default='NONE',
+                help="Configuration File of the tool")
     
     return parser.parse_args()
     
@@ -284,18 +293,27 @@ def check_options(parsed_args):
         sys.exit()
    
     # section of code that deals determining the number of CPU cores that will be used by the program
-    if parsed_args.num_proc > os.sysconf("SC_NPROCESSORS_CONF"):
-        num_proc = os.sysconf("SC_NPROCESSORS_CONF")
-    elif parsed_args.num_proc < 1:
-        num_proc = 1
-    else:
-        num_proc = int(parsed_args.num_proc)
+    try:
+        num_proc = int(parsed_args.num_proc)  
+        if parsed_args.num_proc > os.sysconf("SC_NPROCESSORS_CONF"):
+            num_proc = os.sysconf("SC_NPROCESSORS_CONF")
+        elif parsed_args.num_proc < 1:
+            num_proc = 1
+        else:
+            num_proc = int(parsed_args.num_proc)
+    except:
+        print "The number of processors that you entered %s is not an integer, please enter a positive integer." % parsed_args.num_proc
+        sys.exit()
     
-    if parsed_args.min_genes <= 0:
-        min_genes = 1
-    else:
-        min_genes = parsed_args.min_genes
-        
+    try:
+        min_no_genes = int(parsed_args.min_genes)
+        if parsed_args.min_genes <= 0:
+            min_genes = 1
+        else:
+            min_genes = parsed_args.min_genes
+    except:
+        print "The minimum number of genes that you entered %s is not an integer, please enter a positive integer." % parsed_args.min_genes
+        sys.exit()   
     # validate the input for the maximum allowed gap
     try:    
         max_gap = int(parsed_args.max_gap)
@@ -315,9 +333,12 @@ def check_options(parsed_args):
         print "The file %s does not exist." % parsed_args.tree_file
         sys.exit()
     
-        
-    #e_val = float(parsed_args.eval)
-    e_val = parsed_args.eval
+    try:
+        float(parsed_args.eval)
+        e_val = parsed_args.eval
+    except:
+       print "The Blast Threshold that you entered %s is not a valid Float" % parsed_args.eval
+       sys.exit() 
     
     gene_block_file = parsed_args.gene_block_file
     
@@ -330,11 +351,47 @@ def check_options(parsed_args):
     else:
         print "The folder %s does not exist." % parsed_args.db_directory
         sys.exit()
-        
-
+     
+    ##New parameters Added 
+    #refrence_organism = parsed_args.refrence_organism
+    if os.path.exists(parsed_args.configuration_file):
+        f = file(parsed_args.configuration_file)
+        cfg = Config(f)
+        configuration(cfg)
+    elif parsed_args.configuration_file == 'NONE':
+        pass
+    else:
+        print "The configuration file %s does not exist." % parsed_args.configuration_file
+        sys.exit()
+    #print conf_var.regulon_url
     #return genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val
     return genbank_directory, gene_block_file, outfolder, filter_file, num_proc, min_genes, max_gap, e_val, tree_file, clean, quiet, db_directory
 
+
+def configuration(configuration_object):
+    config_dict = {}
+    for m in configuration_object.configuration:
+        config_dict.update({m.variable_name:m.value})
+        #print m.variable_name,m.value
+        #print "\n"
+    conf_var.regulon_url = config_dict['regulon_url'] if 'regulon_url' in config_dict else ""
+    conf_var.regulon_outfolder = config_dict['regulon_outfolder'] if 'regulon_outfolder' in config_dict else ""
+    conf_var.regulon_default_gene_block_file = config_dict['regulon_default_gene_block_file'] if 'regulon_default_gene_block_file' in config_dict else ""
+    conf_var.tree_marker_gene = config_dict['tree_marker_gene'] if 'tree_marker_gene' in config_dict else ""
+    conf_var.tree_outfolder = config_dict['tree_outfolder'] if 'tree_outfolder' in config_dict else ""
+    conf_var.BLAST_database_folder = config_dict['BLAST_database_folder'] if 'BLAST_database_folder' in config_dict else ""
+    conf_var.BLAST_format_protein = config_dict['BLAST_format_protein'] if 'BLAST_format_protein' in config_dict else ""
+    conf_var.gene_block_query_outfile = config_dict['gene_block_query_outfile'] if 'gene_block_query_outfile' in config_dict else ""
+    conf_var.refrence_organism = config_dict['refrence_organism'] if 'refrence_organism' in config_dict else ""
+    conf_var.BLAST_outfolder = config_dict['BLAST_outfolder'] if 'BLAST_outfolder' in config_dict else ""
+    conf_var.BLAST_parse_outfolder = config_dict['BLAST_parse_outfolder'] if 'BLAST_parse_outfolder' in config_dict else ""
+    conf_var.filter_BLAST_parse_outfolder = config_dict['filter_BLAST_parse_outfolder'] if 'filter_BLAST_parse_outfolder' in config_dict else ""
+    conf_var.event_distance_outfolder = config_dict['event_distance_outfolder'] if 'event_distance_outfolder' in config_dict else ""
+    conf_var.visualization_outfolder = config_dict['visualization_outfolder'] if 'visualization_outfolder' in config_dict else ""
+    conf_var.newick_tree = config_dict['newick_tree_name'] if 'newick_tree_name' in config_dict else ""
+    conf_var.accession_to_common = config_dict['Accesion_Name_mapping_File'] if 'Accesion_Name_mapping_File' in config_dict else ""
+    conf_var.phylo_order_new = config_dict['Phylogenetic_Order_Species_File'] if 'Phylogenetic_Order_Species_File' in config_dict else ""
+    
 # This function will clean up the output of the program so that intermediate files or directories are removed.
 # The major reason that this function exists is that a large number of debugging intermediate steps exist, and 
 # regular users of the program do not benefit from keeping this data, so i'm removing it.
@@ -383,8 +440,8 @@ def main():
     # 1) Make it possible to choose a protein or RNA gene, currently only protein genes are accepted.
     # 2) Allow users to provide their own phylogenetic tree, and have the program use it, producing an accession list from the data if the tree lables are of a certain format
     #       2.1) options have been added to allow this.  the script needs to accomodate this option at this point.
-    project_tree_outfolder = outfolder + tree_outfolder.lstrip("./")
-    cmd1 = "./create_newick_tree.py --genbank_directory %s  --filter %s --outfolder %s --marker_gene %s" % (genbank_directory, filter_file, project_tree_outfolder, tree_marker_gene)
+    project_tree_outfolder = outfolder + conf_var.tree_outfolder.lstrip("./")
+    cmd1 = "./create_newick_tree.py --genbank_directory %s  --filter %s --outfolder %s --marker_gene %s" % (genbank_directory, filter_file, project_tree_outfolder, conf_var.tree_marker_gene)
     #cmd2 = "./create_newick_tree.py --genbank_directory %s  -f %s" % (genbank_directory, filter_file)
     if quiet:
        cmd1 = cmd1 + " --quiet"
@@ -410,10 +467,10 @@ def main():
     
     if gene_block_file == "NONE": # run the regulon script
         #now we need to set the output file for this stage
-        project_regulon_outfolder = outfolder + regulon_outfolder
+        project_regulon_outfolder = outfolder + conf_var.regulon_outfolder
         #print "project_regulon_outfolder ", project_regulon_outfolder 
-        cmd2 = "./regulondb_dl_parse.py --filter %s --infolder %s --outfolder %s --num_proc %i --url %s --min_genes %i" % (filter_file, genbank_directory, project_regulon_outfolder, num_proc, regulon_url, min_genes)
-        if not regulon_experimental_only:
+        cmd2 = "./regulondb_dl_parse.py --filter %s --infolder %s --outfolder %s --num_proc %i --url %s --min_genes %i" % (filter_file, genbank_directory, project_regulon_outfolder, num_proc, conf_var.regulon_url, min_genes)
+        if not conf_var.regulon_experimental_only:
             cmd2 = cmd2 + " --experimantal_only"
 
     	#cmd2 = "./regulondb_dl_parse.py -f phylo_order.txt"
@@ -422,7 +479,7 @@ def main():
     	else:
     	    print "cmd2", cmd2
     	os.system(cmd2)
-    	gene_block_file = outfolder + regulon_default_gene_block_file
+    	gene_block_file = outfolder + conf_var.regulon_default_gene_block_file
         
         #The gene block file is useful to anyone doing further analysis, so I have chosen to keep this ile, the rest of the files that are created can be removed
         results_to_move.append(gene_block_file)
@@ -440,13 +497,13 @@ def main():
     
     #Step 3: Create BLAST searchable databases. (I am limiting this to protein databases right now since that is what we do in the paper)
     if db_directory == 'NONE':
-        project_BLAST_database_folder = outfolder + BLAST_database_folder
+        project_BLAST_database_folder = outfolder + conf_var.BLAST_database_folder
         # BLAST databases are not necessary to keep, unless provided.  This was created for the specifice run, and should be deleted since the databases are large
         results_to_remove.append(project_BLAST_database_folder)
         cmd3 = "./format_db.py --filter %s --genbank_directory %s --outfolder %s --num_proc %i" % (filter_file, genbank_directory, project_BLAST_database_folder,  num_proc)
     
         # Set the database formatting option[Protein or DNA], even though we don't use it (yet).  verified working 7/22/2015
-        if BLAST_format_protein == 'True':
+        if conf_var.BLAST_format_protein == 'True':
             pass
         else:
             cmd3 = cmd3 + ' -d'
@@ -490,9 +547,9 @@ def main():
     
     #This is the only outfile for this stage.  I don't think this needs its own seperate output directory, since this file is potentialy useful
     # to a user after the program is run.
-    project_gene_block_query_outfile = outfolder + gene_block_query_outfile
+    project_gene_block_query_outfile = outfolder + conf_var.gene_block_query_outfile
     
-    cmd4 = "./make_operon_query.py --infolder %s --outfile %s --gene_block_file %s --num_proc %i --refrence %s" % (genbank_directory, project_gene_block_query_outfile, gene_block_file, num_proc, refrence_organism)
+    cmd4 = "./make_operon_query.py --infolder %s --outfile %s --gene_block_file %s --num_proc %i --refrence %s" % (genbank_directory, project_gene_block_query_outfile, gene_block_file, num_proc, conf_var.refrence_organism)
     if quiet:
         cmd4 = cmd4 + " --quiet"
     else:
@@ -510,7 +567,7 @@ def main():
     # TODO: 
     # make it possible to run this on an RNA database, though we have no use case for this currently.  This is of low priority.
     
-    project_BLAST_outfolder = outfolder + BLAST_outfolder
+    project_BLAST_outfolder = outfolder + conf_var.BLAST_outfolder
     
     #cmd5 = "./blast_script.py -d %s -o %s -f %s -n %i -q %s -e %f" % (BLAST_database_folder, blast_outfolder, filter_file, num_proc, gene_block_query_outfile, e_val)
     #cmd5 = "./blast_script.py --database_folder %s --outfolder %s --filter %s --num_proc %i --query %s --eval %f" % (project_BLAST_database_folder, project_BLAST_outfolder, filter_file, num_proc, project_gene_block_query_outfile, e_val)
@@ -534,7 +591,7 @@ def main():
     
     # Step 6: Parse the BLAST result and sort it by gene block
     
-    project_BLAST_parse_outfolder = outfolder + BLAST_parse_outfolder 
+    project_BLAST_parse_outfolder = outfolder + conf_var.BLAST_parse_outfolder 
     
     #cmd6 = "./blast_parse.py -f %s -n %i" % (filter_file, num_proc)
     #cmd6 = "./blast_parse.py --infolder %s --outfolder %s --gene_block_query %s --num_proc %i" % (project_BLAST_outfolder, project_BLAST_parse_outfolder, project_gene_block_query_outfile, num_proc)
@@ -549,9 +606,9 @@ def main():
     # The resulting directory is not necessary, so we may remove if the option is selected.
     results_to_remove.append(project_BLAST_parse_outfolder)
     
-    # Step 7: filter out spurious results and report the gene blocks that best represent the origional.
+    # Step 7: filter out spurious results and report the gene blocks that best represent the original.
     
-    project_filter_BLAST_parse_outfolder = outfolder +  filter_BLAST_parse_outfolder
+    project_filter_BLAST_parse_outfolder = outfolder +  conf_var.filter_BLAST_parse_outfolder
     #cmd7 = "./filter_gene_block_blast_results.py -n %i -g %i" % (num_proc, max_gap)
     #cmd7 = "./filter_gene_block_blast_results.py --infolder %s --outfolder %s --num_proc %i --eval %f --max_gap %i" % (project_BLAST_parse_outfolder, project_filter_BLAST_parse_outfolder, num_proc, e_val, max_gap)
     cmd7 = "./filter_operon_blast_results.py --infolder %s --outfolder %s --num_proc %i --eval %s --max_gap %i" % (project_BLAST_parse_outfolder, project_filter_BLAST_parse_outfolder, num_proc, e_val, max_gap)
@@ -570,7 +627,7 @@ def main():
     
     # Step 8: determine z-scores for each value in the pairwaise event matrix that is calculated in step 7
     
-    project_event_distance_outfolder = outfolder +  event_distance_outfolder
+    project_event_distance_outfolder = outfolder +  conf_var.event_distance_outfolder
     
     # This input will need to be altered to explicity take in the file created in 7... but for now the default will do.
     #cmd8 = "./make_event_distance_matrix.py"
@@ -586,7 +643,7 @@ def main():
     
     # Step 9: Run the visualization pipelilne using the pairwaise event matrix that is calculated in step 7
     
-    project_visualization_outfolder = outfolder + visualization_outfolder
+    project_visualization_outfolder = outfolder + conf_var.visualization_outfolder
     # during a normal run this code should not be necessary, but right now i'm having a problem and have to shove it in.
     if not os.path.isdir(project_visualization_outfolder):
         os.mkdir(project_visualization_outfolder)
@@ -612,8 +669,8 @@ def main():
     
     #print "results_to_move", results_to_move, "results_to_remove", results_to_remove
     if clean:
-        #cleanup_function(results_to_move, results_to_remove, outfolder)
-        print "Clean function Commented";
+        cleanup_function(results_to_move, results_to_remove, outfolder)
+        #print "Clean function Commented";
         
         
     if not quiet:
