@@ -1,3 +1,0 @@
-astCADBE	astA	astB	astC	astD	astE
-atpIBEFHAGDC	atpI	atpH	atpC	atpB	atpA	atpG	atpF	atpE	atpD
-bamA-skp-lpxD-fabZ-lpxAB-rnhB-dnaE	dnaE	skp	rnhB	lpxA	lpxB	lpxD	bamA	fabZ
