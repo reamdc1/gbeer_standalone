@@ -169,13 +169,13 @@ def make_target_fasta(marker, infolder, filter_file, marker_fasta):
         accession = seq_record.annotations['accessions'][0]
         organism_tmp = seq_record.annotations['organism'].replace(' ', '_')
         # Put code here to determine the format of the organisms' english name. currently i am using genus species, but strain can also be used
-        organism = '_'.join(organism_tmp.split('_')[:2])
+        organism = '_'.join(organism_tmp.split('_')[:2])#+"_"+accession
         
         #if(organism == "Natranaerobius_thermophilus") :
                 #print accession
         # Here we store the {organism:accession} information so that we can build a new list that is needed for the visualization pipeline
         common_to_accession_dict.update({organism:accession})
-        
+        #print organism+" "+accession
         found = False
         for fnum, feature in enumerate(seq_record.features):
             #if((organism == "Natranaerobius_thermophilus") and feature.type == 'CDS') :
@@ -234,7 +234,7 @@ def make_target_fasta(marker, infolder, filter_file, marker_fasta):
                         orgs_with_marker.append(accession)
                         found = True
                         break
-            #file.close()
+        #print found   #file.close()
     #outfile = tmp_directory + "distmat_marker.fa"
     #print "outfile", outfile
     #handle = open(outfile, 'w')
