@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 from os.path import join
+import Configuration_Variables as conf_var
 
 # all_evop == a dicitonary with all events and operons
 
-event_types = ['deletions','splits','duplications']
+#event_types = ['deletions','splits','duplications']
 def read_events(inpath):
     all_evop = {}
     # This returns the "all_evop" variable used later
@@ -114,7 +115,7 @@ def loop_events(all_evop, operon):
         event_mean[event_type] = np.mean(event_vec[event_type])
         event_std[event_type] = np.std(event_vec[event_type])
     for species_i, species_j in all_evop[operon]:
-        event_zscore[(species_i,species_j)] = dict.fromkeys(event_types) 
+        event_zscore[(species_i,species_j)] = dict.fromkeys(conf_var.event_types) 
         for event_type in all_evop[operon][(species_i,species_j)]:
 #            print event_type
 #            print "mean, std", event_mean[event_type], event_std[event_type]

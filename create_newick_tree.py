@@ -19,13 +19,15 @@ from Bio.Application import _Option
 from Bio.Align.Applications import ClustalwCommandline
 from Bio import Phylo
 import subprocess
+import Configuration_Variables as conf_var
+import traceback
 
 # Globals
 # The three output file names will be stored in the output directory that is supplied by the user
-newick_tree = 'out_tree.nwk'
+#newick_tree = 'out_tree.nwk'
 #outfile_for_asma = 'accession_to_common.txt'
-accession_to_common = 'accession_to_common.csv'
-phylo_order_new = 'phylo_order_new.txt'
+#accession_to_common = 'accession_to_common.csv'
+#phylo_order_new = 'phylo_order_new.txt'
 
 # This exists to  make the main function easier to read. It contains code to run the argument parser, and does nothing else.
 def parser_code():
@@ -103,7 +105,7 @@ def return_recursive_dir_files(root_dir):
     return result
 
 def return_file_list(infolder, filter_file):
-    if filter_file == '':
+    if filter_file == '' or filter_file == 'NONE':
         return return_recursive_dir_files(infolder)   
     else:
         filter_list = [i.strip() for i in open(filter_file)]
@@ -160,19 +162,24 @@ def make_target_fasta(marker, infolder, filter_file, marker_fasta):
     common_to_accession_dict = {}
     orgs_with_marker = []
     marker = marker.lower()
+    #print len(org_paths)
     for org in org_paths:
         genes_found = []
         seq_record = SeqIO.parse(open(org), "genbank").next()
         accession = seq_record.annotations['accessions'][0]
         organism_tmp = seq_record.annotations['organism'].replace(' ', '_')
         # Put code here to determine the format of the organisms' english name. currently i am using genus species, but strain can also be used
-        organism = '_'.join(organism_tmp.split('_')[:2])
+        organism = '_'.join(organism_tmp.split('_')[:2])#+"_"+accession
         
+        #if(organism == "Natranaerobius_thermophilus") :
+                #print accession
         # Here we store the {organism:accession} information so that we can build a new list that is needed for the visualization pipeline
         common_to_accession_dict.update({organism:accession})
-        
+        #print organism+" "+accession
         found = False
-        for fnum, feature in enumerate(seq_record.features):            
+        for fnum, feature in enumerate(seq_record.features):
+            #if((organism == "Natranaerobius_thermophilus") and feature.type == 'CDS') :
+                #print feature           
             if feature.type == 'CDS':
                 #start = feature.location._start.position
                 start = feature.location.start
@@ -186,14 +193,52 @@ def make_target_fasta(marker, infolder, filter_file, marker_fasta):
                     genes_found.append(gene)
                     seq = feature.qualifiers['translation'] # this returns the protein product, not suitable for RNA products like 16s
                     #result.append(">%s|%s|%s" % (accession, organism, gene))
+                    #print organism+str(seq)
                     result.append(">%s" % organism)
                     result.append(''.join(seq))
                     orgs_with_marker.append(accession)
+                    found = True
                     break
-            
+        #found = True
+        #print marker
+        #This method is to get the rpoB gene protein sequence in those genomes which doesn't have it in their CDS record, but have its coordinates in their misc_feature.
+        if(not found):
+            #file = open(organism+".txt","w")
+            for fnum, feature in enumerate(seq_record.features):
+            #if((organism == "Natranaerobius_thermophilus") and feature.type == 'CDS') :
+                #print feature           
+                if feature.type == 'misc_feature':
+                #start = feature.location._start.position
+                    start = feature.location.start
+                    stop = feature.location.end
+                    try: 
+                        note = feature.qualifiers['note'][0]
+                        noteSplit = note.split(";")
+                        region = 'unknown'
+                        for i in noteSplit:
+                            if('Region' in i):
+                                region = i.split(":")[1].strip()
+                                break
+                    except:
+                        region = 'unknown'
+                    #file.write(region+"\n")
+                    if region.lower() == marker.lower():
+                        #print str(start)+" "+(str(stop))
+                        genes_found.append(gene)
+                        seq = seq_record.seq
+                        seq = str(seq[start:stop].translate()) # this returns the protein product, not suitable for RNA products like 16s
+                        #result.append(">%s|%s|%s" % (accession, organism, gene))
+                        #print organism+seq
+                        result.append(">%s" % organism)
+                        result.append(''.join(seq))
+                        orgs_with_marker.append(accession)
+                        found = True
+                        break
+        #print found   #file.close()
     #outfile = tmp_directory + "distmat_marker.fa"
     #print "outfile", outfile
     #handle = open(outfile, 'w')
+    #print '\n'.join(result)
     handle = open(marker_fasta, 'w')
     handle.write('\n'.join(result))
     handle.close()
@@ -204,9 +249,10 @@ def make_target_fasta(marker, infolder, filter_file, marker_fasta):
     
     #print "common_to_accession_dict", common_to_accession_dict.keys()
     #return "./msa_tmp/distmat_marker.ph", common_to_accession_dict
+    #print len(common_to_accession_dict)
     return common_to_accession_dict
 
-
+##Not Used in the main Code
 def return_tree_order_list(newick_tree_file, common_to_accession_dict):
     result = []
     tree = Phylo.read("out_tree.nwk", "newick")
@@ -314,15 +360,17 @@ def main():
         os.mkdir(tmp_directory)
     except:
         pass
+        #traceback.print_exc()
+        #print "directory Not made"
     #marker_gene = "rpob"
     
     if not quiet:
         print genbank_directory, outfolder, filter_file, marker_gene
     
     # set the paths for the three output files
-    newick_tree_outfile = outfolder + newick_tree
-    accession_to_common_outfile = outfolder + accession_to_common # formally: outfile_for_asma
-    phylo_order_new_outfile = outfolder + phylo_order_new
+    newick_tree_outfile = outfolder + conf_var.newick_tree
+    accession_to_common_outfile = outfolder + conf_var.accession_to_common # formally: outfile_for_asma
+    phylo_order_new_outfile = outfolder + conf_var.phylo_order_new
     
     # Execute code fork that builds a tree from scratch
     if tree_file == 'NONE':

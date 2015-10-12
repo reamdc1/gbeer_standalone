@@ -75,7 +75,9 @@ def produceHeat(fig,gridspace3,max_num, min_num, full_len, txtnames):
     ht_ax.yaxis.set_major_locator(majorLocator)
     ht_ax.xaxis.set_minor_locator(minorLocator)
     ht_ax.grid(True, which='major')
-    ht_ax.set_xticklabels(txtnames, minor=True,rotation=90)
+    ##Added this code to reverse the labels of the heat map.
+    ##The distance matrix from which the heatmap is generated consists of the distance of the pairs of species in the same order so reversing the list to show the correct labels.  
+    ht_ax.set_xticklabels(list(reversed(txtnames)), minor=True,rotation=90)
     plt.setp(ht_ax.get_xmajorticklabels(),visible=False)
     plt.setp(ht_ax.get_yticklabels(),visible=False)    
     plt.setp(ht_ax.get_xticklines(),visible=False)
@@ -102,6 +104,10 @@ def producePhylo(fig,gridspace1,tree_path):
     phyl_ax.add_patch(Rectangle((5.6,0.4),10.2,5.9,edgecolor="turquoise", fill=False))
     '''
     Phylo.draw(tree, axes=phyl_ax, do_show=False,show_confidence=False)
+    #Phylo.draw_graphviz(tree, phyl_ax, )
+    #print os.path.join(joined_path,operon+"phylo.png");
+    #target1 = open.write(operon+"phylo.png",'w');
+    #Phylo.draw_ascii(tree,target1)
     phyl_ax.set_xlim(0,16)
     phyl_ax.set(xlabel='',ylabel='')
     plt.setp(phyl_ax.get_xticklabels(),visible=False)
@@ -193,10 +199,11 @@ def combineAll(max_num, min_num, full_len, txtnames, tree_path, operon, gd_files
     ##heatmapGS = gridspec.GridSpec(2,2,wspace=0.0,hspace=0.0,width_ratios=[0.40,1],height_ratios=[1,1])
     phyl_ax = producePhylo(fig,heatmapGS[0,0],tree_path)
     for gd in gd_files_list:
-        if ntpath.basename(gd.split(".")[0]) == operon.split("_")[0]:
-           geneToColorDict=pickleDict[ntpath.basename(gd.split(".")[0])]
+        if ntpath.basename(gd).split(".")[0] == operon.split("_")[0]:
+           geneToColorDict=pickleDict[ntpath.basename(gd).split(".")[0]]
            gd_ax = imshowGD(fig,heatmapGS[0,1],gd)
            legend_ax = legendDrawing(fig,heatmapGS[1,1],geneToColorDict,gd,operon)
+           #print "in the if";
            break
    
     ht_ax = produceHeat(fig,heatmapGS[0,2], max_num, min_num, full_len, txtnames)
