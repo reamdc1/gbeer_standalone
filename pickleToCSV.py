@@ -94,9 +94,16 @@ def writing_to_file(operon_event,result,csvDir):
 # Used to determine min and max of every operon's event's matrix
 # These min and max values will be used as min and max of the colorbar in TreeGDHeat 
 def minMax(L):
-    result = list(itertools.chain(*L))    
-    min_val = min(filter(lambda t: not math.isnan(t), result))
-    max_val = max(filter(lambda t: not math.isnan(t), result))
+    result = list(itertools.chain(*L))
+    min_val = max_val = 0
+    #compareList = [0]
+    compareList = filter(lambda t: not math.isnan(t), result)
+    if(len(compareList) == 0):
+        compareList.append(0)
+    min_val = min(compareList)
+    max_val = max(compareList)
+    #min_val = min(filter(lambda t: not math.isnan(t), result))
+    #max_val = max(filter(lambda t: not math.isnan(t), result))
     return min_val, max_val
 
 def prep_event(event):
@@ -149,6 +156,7 @@ def generateCombined(eventDict,legend_data,accession_order,organism_order,tree_p
     for operon,event in operon_dict.items():
         result=convert_str(accession_order, event,i)
         full_len = prep_event(event)
+        #print full_len
         min_num, max_num = minMax(full_len)
         treeGDHeat.combineAll(max_num, min_num, full_len, organism_order, tree_path, operon, gd_files_list, combinedDir_path,
 legend_data)
