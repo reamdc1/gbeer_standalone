@@ -21,6 +21,7 @@ from Bio import Phylo
 import subprocess
 import Configuration_Variables as conf_var
 import traceback
+import re
 
 # Globals
 # The three output file names will be stored in the output directory that is supplied by the user
@@ -40,7 +41,7 @@ def parser_code():
     parser.add_argument("-o", "--outfolder", dest="outfolder", metavar="DIRECTORY", default='./tree/',
                 help="Directory where the results of this program will be stored.")
                 
-    parser.add_argument("-f", "--filter", dest="filter", metavar="FILE", default='./phylo_order.txt',
+    parser.add_argument("-f", "--filter", dest="filter", metavar="FILE", default='NONE',
                 help="File restrictiong which accession numbers this script will process. If no file is provided, filtering is not performed.")
                 
     parser.add_argument("-m", "--marker_gene", dest="marker_gene", metavar="STRING", default='rpob',
@@ -163,14 +164,16 @@ def make_target_fasta(marker, infolder, filter_file, marker_fasta):
     orgs_with_marker = []
     marker = marker.lower()
     #print len(org_paths)
+    #temp_handle = open("org_name.txt","w")
     for org in org_paths:
         genes_found = []
         seq_record = SeqIO.parse(open(org), "genbank").next()
         accession = seq_record.annotations['accessions'][0]
         organism_tmp = seq_record.annotations['organism'].replace(' ', '_')
         # Put code here to determine the format of the organisms' english name. currently i am using genus species, but strain can also be used
-        organism = '_'.join(organism_tmp.split('_')[:2])#+"_"+accession
-        
+        organism_tmp_1 = re.sub('[\[\]]', "", organism_tmp)
+        organism = '_'.join(organism_tmp_1.split('_')[:2])#+"_"+accession
+        #temp_handle.write(organism+"\t"+accession+"\n") 
         #if(organism == "Natranaerobius_thermophilus") :
                 #print accession
         # Here we store the {organism:accession} information so that we can build a new list that is needed for the visualization pipeline
@@ -200,7 +203,8 @@ def make_target_fasta(marker, infolder, filter_file, marker_fasta):
                     found = True
                     break
         #found = True
-        #print marker
+	#temp_handle.close()
+        #print str(found) +" "+str(accession)
         #This method is to get the rpoB gene protein sequence in those genomes which doesn't have it in their CDS record, but have its coordinates in their misc_feature.
         if(not found):
             #file = open(organism+".txt","w")
@@ -235,6 +239,7 @@ def make_target_fasta(marker, infolder, filter_file, marker_fasta):
                         found = True
                         break
         #print found   #file.close()
+    #temp_handle.close();
     #outfile = tmp_directory + "distmat_marker.fa"
     #print "outfile", outfile
     #handle = open(outfile, 'w')

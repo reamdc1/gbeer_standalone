@@ -17,6 +17,7 @@ import csv
 import uuid
 import time
 from homolog4 import *
+import scaleup_phy_tree as scale
 
 # TODO: parallelize this code, it takes forever to execute and single threaded on an
 # embarrassingly parallel problem
@@ -222,14 +223,14 @@ def geneToColor(geneList):
 
     Colorlist1 = [colors.red,colors.blue,colors.orange,colors.plum,colors.green,colors.gray,colors.black,colors.magenta,
                                      colors.chartreuse,colors.sandybrown,colors.darkturquoise,colors.indigo,colors.chocolate,
-                                     colors.aquamarine]
+                                     colors.aquamarine,colors.aliceblue,colors.burlywood]
     Colorlist2=["red","blue",
                    "orange","plum",
                    "green","gray",
                    "black","magenta",
                    "chartreuse","sandybrown",
                    "darkturquoise","indigo",
-                   "chocolate","aquamarine"]
+                   "chocolate","aquamarine","aliceblue","burlywood"]
     for i,g in enumerate(geneList):
         idToColorDict_reportLab[g]=Colorlist1[i]
         idToColorDict_matplotlib[g]=Colorlist2[i]
@@ -432,7 +433,10 @@ if __name__ == "__main__":
            operonName =  ntpath.basename(r)
            #print operonName;
            legendData[operonName.split(".")[0]] = idToColorDict_matplotlib
-       pickleToCSV.generateCombined(args.EventsDict,legendData,accession_order,organism_order,args.NewickTree,OutputCSVDirectory,OutputGenomeDiagDirectory,OutputTreeGDHeatDirectory,TempDirectory)   
+       #Scale up the branch length of the phylogenetic tree
+       scaleUpTreePath = os.path.join(args.OutputDirectory,"scaled_up.nwk")
+       scale.scaleUpPhyloTree(args.NewickTree,scaleUpTreePath,5)
+       pickleToCSV.generateCombined(args.EventsDict,legendData,accession_order,organism_order,scaleUpTreePath,OutputCSVDirectory,OutputGenomeDiagDirectory,OutputTreeGDHeatDirectory,TempDirectory)   
        
        
     print time.time() - start
